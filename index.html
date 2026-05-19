@@ -159,7 +159,7 @@ function render(){
   const cta = document.getElementById('continueBtn');
   if(nextModule){
     cta.textContent = (completed > 0 ? 'Continue: ' : 'Start: ') + 'Module ' + nextModule.num + ' →';
-    cta.onclick = () => { window.location.href = './' + nextModule.folder + '/' + nextModule.file; };
+    cta.onclick = () => { window.location.href = './' + nextModule.file; };
   } else if(completed === REGISTRY.length){
     cta.textContent = '🎉 Course Complete';
     cta.style.background = '#2e7d4f';
@@ -167,7 +167,7 @@ function render(){
     cta.onclick = null;
   } else {
     cta.textContent = 'Start: Module 1 →';
-    cta.onclick = () => { window.location.href = './' + REGISTRY[0].folder + '/' + REGISTRY[0].file; };
+    cta.onclick = () => { window.location.href = './' + REGISTRY[0].file; };
   }
 
   const groups = {};
@@ -188,7 +188,7 @@ function render(){
 
   document.querySelectorAll('.mod-card').forEach(el => {
     if(el.classList.contains('locked')) return;
-    el.onclick = () => { window.location.href = './' + el.dataset.folder + '/' + el.dataset.file; };
+    el.onclick = () => { window.location.href = './' + el.dataset.file; };
   });
 }
 
