@@ -216,7 +216,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 </head>
 <body>
 <header>
-  <a class="logo" href="../index.html">
+  <a class="logo" href="./index.html">
     <span class="logo-mark">ELDT NOW</span>
     <span class="logo-text">Entry-Level Driver Training</span>
   </a>
@@ -231,7 +231,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
         <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 33 complete</span>
       </div>
       <div id="dropdownItems"></div>
-      <div class="dropdown-footer"><a href="../index.html">← Back to Course Home</a></div>
+      <div class="dropdown-footer"><a href="./index.html">← Back to Course Home</a></div>
     </div>
   </div>
 </header>
@@ -379,7 +379,7 @@ function buildDropdown(){
       link.style.pointerEvents = 'none';
       link.href = 'javascript:void(0)';
     } else if(isCompleted || isUnlocked){
-      link.href = '../' + m.folder + '/' + m.file;
+      link.href = './' + m.file;
     } else {
       link.href = 'javascript:void(0)';
       link.addEventListener('click', e => { e.preventDefault(); });
@@ -818,8 +818,8 @@ function showResults(){
         ${pass
           ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
             (nextModule
-              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
-              : '<a class="btn btn-next" href="../index.html">Back to Course Home</a>')
+              ? '<a class="btn btn-next" href="./' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
+              : '<a class="btn btn-next" href="./index.html">Back to Course Home</a>')
           : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
       </div>
     </div>
