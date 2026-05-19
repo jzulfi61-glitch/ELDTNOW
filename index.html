@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Complete ELDT Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none;color:#fff}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.header-cta{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none}
+.hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:70px 32px;text-align:center}
+.hero-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;letter-spacing:1px;margin-bottom:14px;line-height:1.05}
+.hero-sub{font-size:18px;color:rgba(255,255,255,.85);max-width:680px;margin:0 auto 32px;line-height:1.55}
+.hero-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;color:var(--accent);line-height:1}
+.hero-stat-label{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-top:4px}
+.hero-progress{max-width:540px;margin:0 auto;background:rgba(255,255,255,.1);border-radius:8px;padding:18px 22px}
+.hero-progress-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;font-weight:700}
+.hero-progress-bar{height:10px;background:rgba(255,255,255,.15);border-radius:5px;overflow:hidden;margin-bottom:8px}
+.hero-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#f4c069);width:0%;transition:width .6s ease}
+.hero-progress-text{font-size:14px;color:rgba(255,255,255,.85)}
+.hero-cta{display:inline-block;margin-top:14px;font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);padding:14px 36px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;text-decoration:none;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.container{max-width:1200px;margin:0 auto;padding:48px 24px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--blue);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.section-h{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;margin-bottom:8px;line-height:1.15}
+.section-sub{color:var(--muted);margin-bottom:28px;font-size:15px}
+.group{margin-bottom:36px}
+.group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.group-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.group-count{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--blue);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.mod-card{background:#fff;border-radius:10px;border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;overflow:hidden;cursor:pointer}
+.mod-card:hover:not(.locked){transform:translateY(-3px);box-shadow:0 6px 20px rgba(13,27,42,.12);border-color:var(--blue)}
+.mod-card.locked{cursor:not-allowed;background:#fafbfc;opacity:.7}
+.mod-card.locked:hover{transform:none;box-shadow:var(--shadow)}
+.mod-card.completed{border-color:var(--success);background:#f7fcf9}
+.mod-card.current{border-color:var(--accent);border-width:2px}
+.mod-top{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fafbfd,#fff)}
+.mod-card.completed .mod-top{background:linear-gradient(180deg,#eef9f1,#f7fcf9);border-color:#cbe9d3}
+.mod-num{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);font-weight:700}
+.mod-card.completed .mod-num{color:var(--success)}
+.mod-card.locked .mod-num{color:var(--muted)}
+.mod-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--border);color:#fff}
+.mod-card.completed .mod-status{background:var(--success)}
+.mod-card.completed .mod-status::before{content:"✓"}
+.mod-card.current .mod-status{background:var(--accent)}
+.mod-card.current .mod-status::before{content:"▶"}
+.mod-card.locked .mod-status{background:transparent;color:var(--muted);font-size:14px}
+.mod-card.locked .mod-status::before{content:"🔒"}
+.mod-card.unlocked:not(.completed):not(.current) .mod-status{background:var(--blue);color:#fff}
+.mod-card.unlocked:not(.completed):not(.current) .mod-status::before{content:"○"}
+.mod-body{padding:16px 18px;flex:1;display:flex;flex-direction:column}
+.mod-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--navy);font-weight:700;line-height:1.2;margin-bottom:6px}
+.mod-card.locked .mod-title{color:var(--muted)}
+.mod-unit{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.mod-action{margin-top:auto;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:6px}
+.mod-card.completed .mod-action{color:var(--success)}
+.mod-card.locked .mod-action{color:var(--muted)}
+.mod-action-arrow{transition:transform .15s}
+.mod-card:hover:not(.locked) .mod-action-arrow{transform:translateX(4px)}
+.mod-score{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--success);background:var(--success-light);padding:3px 10px;border-radius:12px;font-weight:700;letter-spacing:.5px}
+footer{background:var(--navy);color:rgba(255,255,255,.7);padding:32px 28px;text-align:center;font-size:13px;margin-top:auto}
+footer a{color:var(--accent);text-decoration:none}
+.reset-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:6px 14px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:all .15s}
+.reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+@media (max-width:700px){.hero h1{font-size:36px}.hero-stats{gap:24px}.hero-stat-num{font-size:32px}.container{padding:32px 16px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <a class="header-cta" href="#modules">View All Modules</a>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">FMCSA-Compliant ELDT Theory Course</div>
+  <h1>Your Complete CDL Theory Training</h1>
+  <p class="hero-sub">33 interactive modules covering every FMCSA Entry-Level Driver Training topic — from your first pre-trip inspection to hazardous materials handling and federal compliance.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">33</div><div class="hero-stat-label">Modules</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">15</div><div class="hero-stat-label">Quiz Q's Each</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">80%</div><div class="hero-stat-label">Passing Score</div></div>
+  </div>
+  <div class="hero-progress">
+    <div class="hero-progress-label">Your Progress</div>
+    <div class="hero-progress-bar"><div class="hero-progress-fill" id="overallFill"></div></div>
+    <div class="hero-progress-text" id="overallText">0 of 33 modules completed</div>
+    <button class="hero-cta" id="continueBtn">Start Learning</button>
+  </div>
+</section>
+
+<div class="container" id="modules">
+  <div class="section-title">Course Outline</div>
+  <h2 class="section-h">All 33 ELDT Modules</h2>
+  <p class="section-sub">Complete each module in order. Module N unlocks when Module N−1 is passed (80%+).</p>
+  <div id="groups"></div>
+</div>
+
+<footer>
+  <div>ELDT NOW · <a href="https://eldtnow.org">eldtnow.org</a></div>
+  <div style="margin-top:8px;font-size:12px;opacity:.7">ELDT requirements per 49 CFR Part 380 — FMCSA</div>
+  <button class="reset-btn" onclick="resetProgress()">Reset My Progress</button>
+</footer>
+
+<script>
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","folder":"module1","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","folder":"module2","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","folder":"module3","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","folder":"module4","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","folder":"module5","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","folder":"module6","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","folder":"module7","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","folder":"module8","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","folder":"module9","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","folder":"module10","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","folder":"module11","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","folder":"module12","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","folder":"module13","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","folder":"module14","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","folder":"module15","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control/Recovery, Jackknifing, and Other Emergencies","folder":"module16","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","folder":"module17","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","folder":"module18","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","folder":"module19","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","folder":"module20","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","folder":"module21","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","folder":"module22","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","folder":"module23","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","folder":"module24","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","folder":"module25","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":26,"slug":"external-communications","unit":"1.5.6","title":"External Communications","folder":"module26","file":"ELDT_1.5.6_ExternalCommunications.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":27,"slug":"whistleblower-coercion","unit":"1.5.7","title":"Whistleblower/Coercion","folder":"module27","file":"ELDT_1.5.7_WhistleblowerCoercion.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":28,"slug":"trip-planning","unit":"1.5.8","title":"Trip Planning","folder":"module28","file":"ELDT_1.5.8_TripPlanning.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":29,"slug":"drugs-alcohol","unit":"1.5.9","title":"Drugs/Alcohol","folder":"module29","file":"ELDT_1.5.9_DrugsAlcohol.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":30,"slug":"medical-requirements","unit":"1.5.10","title":"Medical Requirements","folder":"module30","file":"ELDT_1.5.10_MedicalRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"}];
+
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(d){ try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  reset(){ try { localStorage.removeItem(this.KEY); } catch(e){} },
+  isUnlocked(slug){
+    const d = this._load();
+    const i = REGISTRY.findIndex(m => m.slug === slug);
+    if(i <= 0) return true;
+    return !!(d[REGISTRY[i - 1].slug] && d[REGISTRY[i - 1].slug].completed);
+  }
+};
+
+function render(){
+  const all = Progress.getAll();
+  const completed = REGISTRY.filter(m => all[m.slug] && all[m.slug].completed).length;
+  const pct = Math.round((completed / REGISTRY.length) * 100);
+
+  document.getElementById('overallFill').style.width = pct + '%';
+  document.getElementById('overallText').textContent =
+    completed + ' of ' + REGISTRY.length + ' modules completed (' + pct + '%)';
+
+  let nextModule = null;
+  for(const m of REGISTRY){
+    if(!(all[m.slug] && all[m.slug].completed) && Progress.isUnlocked(m.slug)){
+      nextModule = m;
+      break;
+    }
+  }
+  const cta = document.getElementById('continueBtn');
+  if(nextModule){
+    cta.textContent = (completed > 0 ? 'Continue: ' : 'Start: ') + 'Module ' + nextModule.num + ' →';
+    cta.onclick = () => { window.location.href = './' + nextModule.folder + '/' + nextModule.file; };
+  } else if(completed === REGISTRY.length){
+    cta.textContent = '🎉 Course Complete';
+    cta.style.background = '#2e7d4f';
+    cta.style.color = '#fff';
+    cta.onclick = null;
+  } else {
+    cta.textContent = 'Start: Module 1 →';
+    cta.onclick = () => { window.location.href = './' + REGISTRY[0].folder + '/' + REGISTRY[0].file; };
+  }
+
+  const groups = {};
+  REGISTRY.forEach(m => { if(!groups[m.group]) groups[m.group] = []; groups[m.group].push(m); });
+
+  const groupsEl = document.getElementById('groups');
+  groupsEl.innerHTML = '';
+  Object.entries(groups).forEach(([groupName, mods]) => {
+    const groupCompleted = mods.filter(m => all[m.slug] && all[m.slug].completed).length;
+    const wrap = document.createElement('div');
+    wrap.className = 'group';
+    wrap.innerHTML =
+      '<div class="group-header"><div class="group-name">' + groupName + '</div>' +
+      '<div class="group-count">' + groupCompleted + ' / ' + mods.length + ' done</div></div>' +
+      '<div class="module-grid">' + mods.map(m => renderCard(m, all, nextModule)).join('') + '</div>';
+    groupsEl.appendChild(wrap);
+  });
+
+  document.querySelectorAll('.mod-card').forEach(el => {
+    if(el.classList.contains('locked')) return;
+    el.onclick = () => { window.location.href = './' + el.dataset.folder + '/' + el.dataset.file; };
+  });
+}
+
+function renderCard(m, all, nextModule){
+  const rec         = all[m.slug] || {};
+  const isCompleted = !!rec.completed;
+  const isUnlocked  = Progress.isUnlocked(m.slug);
+  const isCurrent   = nextModule && nextModule.slug === m.slug;
+  let cls = 'mod-card';
+  if(isCurrent)       cls += ' current';
+  if(isCompleted)     cls += ' completed';
+  else if(isUnlocked) cls += ' unlocked';
+  else                cls += ' locked';
+  const actionText = isCompleted ? 'Review module' : isCurrent ? 'Continue' : isUnlocked ? 'Start module' : 'Locked';
+  const arrow      = isCompleted ? '↻' : (isCurrent || isUnlocked) ? '→' : '';
+  const scoreBadge = isCompleted && rec.quizScore ? '<div class="mod-score">' + rec.quizScore + '%</div>' : '';
+  return '<div class="' + cls + '" data-folder="' + m.folder + '" data-file="' + m.file + '">' +
+    '<div class="mod-top"><div class="mod-num">Module ' + m.num + '</div>' +
+    '<div style="display:flex;gap:10px;align-items:center">' + scoreBadge + '<div class="mod-status"></div></div></div>' +
+    '<div class="mod-body"><div class="mod-title">' + m.title + '</div>' +
+    '<div class="mod-unit">Unit ' + m.unit + '</div>' +
+    '<div class="mod-action"><span>' + actionText + '</span><span class="mod-action-arrow">' + arrow + '</span></div>' +
+    '</div></div>';
+}
+
+function resetProgress(){
+  if(confirm('Reset all module progress? This cannot be undone.')){ Progress.reset(); render(); }
+}
+
+window.addEventListener('DOMContentLoaded', render);
+window.addEventListener('focus',    render);
+window.addEventListener('pageshow', render);
+</script>
+</body>
+</html>

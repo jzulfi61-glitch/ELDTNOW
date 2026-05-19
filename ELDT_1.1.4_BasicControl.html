@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Module 4 · Basic Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding-left:14px;margin:18px 0;background:#fffdf6;padding:12px 16px;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.class-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.class-letter{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1;background:var(--navy);color:var(--accent);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.class-desc{font-size:14px;color:var(--text);line-height:1.45}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.formula-box{background:#0d1b2a;color:#fff;border-radius:8px;padding:20px;margin:18px 0}
+.formula{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-align:center;padding:10px 0;color:var(--accent);letter-spacing:1px}
+.formula-key{list-style:none;margin:14px 0 0 0!important;font-size:14px;color:rgba(255,255,255,.85)}
+.formula-key li{padding:4px 0 4px 20px;position:relative;line-height:1.5;margin:0!important}
+.formula-key li::before{content:"•";position:absolute;left:0;color:var(--accent)}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td.ok{color:var(--success);font-weight:700}
+.data-table td.bad{color:var(--danger);font-weight:700}
+
+/* ---- Narration box with pause/play control ---- */
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <span><strong>UNIT 1.1.4</strong> Basic Control</span>
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 33 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 33 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="../index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <div class="welcome-eyebrow">Module 4 · Unit 1.1.4</div>
+      <h1>Basic Control</h1>
+      <div class="welcome-unit">Moving, stopping, turning, and backing a tractor-trailer</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul>
+          <li>Discuss how to start up and shut down the engine of a tractor-trailer</li>
+          <li>Describe how to put a tractor-trailer in motion and come to a complete stop</li>
+          <li>Identify ways to maneuver through turns, curves, and roundabouts, and enter/exit highways safely</li>
+          <li>Explain how to successfully straight-line back a tractor-trailer</li>
+        </ul>
+      </div>
+      <button class="btn-start" onclick="startCourse()">Begin Course</button>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>
+      <span>Knowledge Check</span>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ============ CONFIG ============
+const USE_MP3 = false;
+const AUDIO_BASE_PATH = './audio/';
+const NARRATION_RATE = 0.95;
+
+// ============ CROSS-MODULE PROGRESS SYSTEM ============
+// Tracks completion of all 33 modules. Currently localStorage-based.
+// To migrate to a backend account system later, replace the four method
+// bodies below with API calls. The rest of the application code does not
+// need to change.
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  }
+};
+
+// ============ MODULE-LEVEL DATA ============
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","folder":"module1","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","folder":"module2","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","folder":"module3","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","folder":"module4","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","folder":"module5","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","folder":"module6","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","folder":"module7","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","folder":"module8","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","folder":"module9","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","folder":"module10","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","folder":"module11","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","folder":"module12","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","folder":"module13","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","folder":"module14","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","folder":"module15","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control/Recovery, Jackknifing, and Other Emergencies","folder":"module16","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","folder":"module17","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","folder":"module18","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","folder":"module19","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","folder":"module20","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","folder":"module21","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","folder":"module22","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","folder":"module23","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","folder":"module24","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","folder":"module25","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":26,"slug":"external-communications","unit":"1.5.6","title":"External Communications","folder":"module26","file":"ELDT_1.5.6_ExternalCommunications.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":27,"slug":"whistleblower-coercion","unit":"1.5.7","title":"Whistleblower/Coercion","folder":"module27","file":"ELDT_1.5.7_WhistleblowerCoercion.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":28,"slug":"trip-planning","unit":"1.5.8","title":"Trip Planning","folder":"module28","file":"ELDT_1.5.8_TripPlanning.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":29,"slug":"drugs-alcohol","unit":"1.5.9","title":"Drugs/Alcohol","folder":"module29","file":"ELDT_1.5.9_DrugsAlcohol.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":30,"slug":"medical-requirements","unit":"1.5.10","title":"Medical Requirements","folder":"module30","file":"ELDT_1.5.10_MedicalRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"}];
+const CURRENT_MODULE_SLUG = 'basic-control';
+const slides = [{"section":"getting-started","sectionLabel":"Getting Started","title":"Welcome to Basic Vehicle Control","contentHTML":"<p>Operating a tractor-trailer is fundamentally different from driving a personal vehicle.</p><p>Everything — starting the engine, putting it in motion, turning, stopping, and backing — requires a new set of knowledge and skills.</p><p class=\"emphasis\">These fundamentals are the foundation for every driving skill that follows in this program.</p>","narration":"Welcome to Module 4 — Basic Vehicle Control, Unit A1.1.4 of the federal ELDT curriculum. Operating a tractor-trailer is fundamentally different from driving a car or pickup. Everything about it — from starting the engine to making a simple turn — requires a new set of knowledge and skills. The concepts in this module are the foundation for everything that comes after. Master these, and the more advanced skills will build naturally on top of them."},{"section":"getting-started","sectionLabel":"Getting Started","title":"What You'll Learn","contentHTML":"<p>By the end of this module, you will be able to:</p><ul><li>Discuss how to start up and shut down the engine of a tractor-trailer</li><li>Describe how to put a tractor-trailer in motion and come to a complete stop</li><li>Identify ways to maneuver through turns, curves, and roundabouts, and enter/exit highways safely</li><li>Explain how to successfully straight-line back a tractor-trailer</li></ul>","narration":"Here's what you're going to take away from this module. You'll know the correct procedure for starting and shutting down a tractor-trailer engine. You'll be able to put the vehicle in motion and bring it to a full stop safely. You'll understand how to execute turns, navigate curves and roundabouts, and enter and exit highways. And you'll know the basics of straight-line backing — the simplest but one of the most challenging maneuvers a tractor-trailer driver performs."},{"section":"engine","sectionLabel":"Starting, Warming Up, and Shutting Down","title":"Engine Start-Up, Warm-Up, and Shutdown","contentHTML":"<p><strong>Engine Start-Up:</strong></p><ol><li>Apply the parking brake</li><li>Depress the clutch pedal completely; put the truck in neutral</li><li>Turn the ignition switch/key on</li><li>Operate the starter. If the engine doesn't start in <strong>15–20 seconds</strong>, turn the ignition off for <strong>at least 1 minute</strong> and try again</li><li>Once started and in neutral, ease off the clutch</li><li>Check all instruments and gauges — especially oil pressure. In warm weather, oil pressure should reach operating level within <strong>3–5 seconds</strong>. If it does not → shut off immediately</li></ol><p><strong>Engine Warm-Up:</strong></p><ul><li>Idle at low RPM (800–1,000 RPMs); allows oil to circulate and air pressure to build</li><li>Engine warm-up is complete when water temperature reaches <strong>170°F–195°F</strong></li><li>Avoid excessive idling — most modern engines need only a few minutes; many states and localities have idling restrictions</li></ul><p><strong>Engine Shutdown:</strong></p><ol><li>Depress the clutch; move the gear shift to neutral</li><li>Set the parking brakes</li><li>Turn the engine off</li></ol><p class=\"footnote\">Allow adequate cool-down time — shutting down too quickly after hard operation can damage turbocharged engines.</p>","narration":"There's a specific procedure for starting, warming up, and shutting down a tractor-trailer engine. For startup: apply the parking brake. Depress the clutch completely to the floor and make sure the truck is in neutral. Turn the ignition on. Operate the starter — if the engine doesn't start in 15 to 20 seconds, turn the ignition off for at least one minute before trying again. Once the engine starts and the transmission is in neutral, ease off the clutch. Then check all instruments and gauges. Pay close attention to oil pressure — in warm weather it should reach operating level within 3 to 5 seconds. If it doesn't, shut the engine off immediately. Severe damage can result from no oil pressure. For warm-up: let the engine idle at low RPM — 800 to 1,000 RPM. This lets the oil warm and circulate and air pressure to build. Warm-up is complete when water temperature reaches 170 to 195 degrees Fahrenheit. Avoid excessive idling — most modern engines don't need more than a few minutes, and many states have idling restrictions. For shutdown: depress the clutch, shift to neutral, set the parking brakes, and turn the engine off. Allow adequate cool-down time — shutting down a turbocharged engine too quickly after hard operation can cause damage."},{"section":"motion","sectionLabel":"Putting the Vehicle in Motion","title":"Putting a Tractor-Trailer in Motion","contentHTML":"<p>Operating a tractor-trailer requires more specific skill than driving a personal vehicle.</p><ol><li>Release the tractor and trailer parking brakes</li><li>Depress the clutch fully (engaging the clutch brake) and place the transmission in the lowest gear</li><li>Release the clutch to the <strong>friction point</strong> — the point where the clutch begins to engage. You'll know you've reached it when RPMs drop slightly</li><li>Gradually release the clutch until fully engaged. As you engage the clutch, a slight increase in RPMs may be needed to avoid stalling (100–300 RPMs is normal)</li><li>When the vehicle starts to move, gradually increase RPMs by depressing the throttle</li><li>When the clutch is fully engaged and the vehicle is in motion — take your foot <strong>off the clutch pedal</strong></li><li>Avoid excessive clutch slipping — engage as smoothly as possible with as little additional fuel as possible</li></ol><p>Once moving: <strong>speed up slowly and gradually</strong>. Hold the steering wheel firmly in both hands on opposite sides. <strong>Center the vehicle in the lane</strong> — the width of the truck leaves little margin on either side.</p>","narration":"Putting a tractor-trailer in motion takes more care and precision than driving a car. Release the tractor and trailer parking brakes. Depress the clutch fully to engage the clutch brake and place the transmission in the lowest gear. Release the clutch slowly to the friction point — the point where the clutch starts to engage. You'll feel it and hear it: the RPMs will drop slightly when you've reached it. Then gradually release the clutch the rest of the way. You may need a slight increase in RPMs to avoid stalling — 100 to 300 RPMs more is normal. As the vehicle starts to move, gradually increase RPMs using the throttle. Once the clutch is fully engaged and the vehicle is rolling, take your foot completely off the clutch pedal — don't ride it. Avoid excessive clutch slipping by using as little extra fuel as possible until the clutch is fully engaged. Once you're moving, speed up slowly and gradually. Hold the steering wheel firmly in both hands on opposite sides of the wheel. Center the vehicle in its lane — the width of the truck leaves very little margin on either side."},{"section":"motion","sectionLabel":"Putting the Vehicle in Motion","title":"Stopping a Tractor-Trailer and Testing the Hook-Up","contentHTML":"<p><strong>Stopping:</strong></p><ol><li>Release the accelerator pedal</li><li>Depress the brake pedal gradually — the amount of pressure needed depends on available stopping room</li><li>As the vehicle slows, downshift to the appropriate gear</li><li>As the vehicle approaches a stop, release some brake pressure; when the engine is almost at idle, depress the clutch (truck should stop within the next <strong>50–75 feet</strong>)</li><li>After stopping, maintain enough brake pressure to keep the vehicle stationary; if parking, shift to neutral, apply parking brakes, and release the clutch</li></ol><p><strong>Testing the tractor-trailer hook-up</strong> (the coupling must be tested every time a trailer is connected):</p><ul><li><strong>With a hand valve:</strong> Release tractor and trailer brakes; clutch in, lowest gear; engage the hand valve (trailer brakes); release clutch to friction point; <em>pull gently</em> against locked trailer brakes — stop as soon as the engine starts to drag down; disengage clutch; reset brakes</li><li><strong>Without a hand valve:</strong> Release tractor brake only; same process — pull gently against locked trailer brakes</li></ul>","narration":"To stop a tractor-trailer: release the accelerator, depress the brake pedal gradually — how much pressure depends on how much room you have. As the vehicle slows, downshift to the appropriate gear. As you get close to a stop, release some brake pressure. When the engine is almost at idle, depress the clutch — the truck should stop within the next 50 to 75 feet. After stopping, maintain enough brake pressure to keep the vehicle stationary. If you're parking, shift to neutral, apply the parking brakes, and release the clutch. Testing the hook-up is required every time a trailer is connected to a tractor. With a hand valve: release the tractor and trailer brakes. Press the clutch in and put the transmission in the lowest gear. Engage the hand valve to apply the trailer brakes. Release the clutch to the friction point. Pull gently forward against the locked trailer brakes — stop as soon as you feel the engine starting to drag down. That resistance tells you the fifth wheel is locked and the trailer isn't going anywhere. Disengage the clutch and reset the brakes. For vehicles without a hand valve, the procedure is the same except you only release the tractor brake and pull against the trailer's locked emergency brakes."},{"section":"backing","sectionLabel":"Straight Line Backing","title":"Straight Line Backing","contentHTML":"<p>Backing is one of the most challenging tractor-trailer maneuvers to master. This is an introduction to straight-line backing — the simplest form.</p><p><strong>Six steps:</strong></p><ol><li><strong>Position the vehicle properly</strong> — move forward until the tractor and trailer are straight and the front wheels are straight</li><li><strong>Clear the area</strong> — get out and walk around; check to the rear, above, under, and to the sides, and in front of the vehicle; check for adequate swing clearance. <em>Don't delay after checking — a hazard could move in while you're repositioning</em></li><li><strong>Watch speed</strong> — turn on four-way flashers; put the vehicle in reverse; back at idle speed, as slowly as possible; don't ride the clutch or brakes</li><li><strong>Check behind constantly</strong> — check all mirrors; if uncertain about what's behind you, stop, get out, and look</li><li><strong>Steering</strong> — keep the vehicle on path; don't over-steer; if drifting starts, turn the wheel in the direction of the drift immediately; only slight correction is needed if caught early</li><li><strong>Pull up and start again</strong> if the vehicle is too far out of position — it's easier and safer to pull forward and reset than to try to correct while backing</li></ol>","narration":"Backing is one of the most difficult maneuvers to master, even though straight-line backing is the simplest form. Six steps. Step one: position the vehicle properly. Move forward until the tractor and trailer are straight and the front wheels are straight. Step two: clear the area. Get out and walk around the entire vehicle. Check to the rear, above and below, to the sides, and in front. Check for adequate swing clearance. And don't delay after clearing — a hazard could move into your path while you're climbing back in. If there's a delay, do the safety check again. Step three: watch your speed. Turn on your four-way flashers and put the vehicle in reverse. Back at idle speed, as slowly as possible — don't ride the clutch or brakes. Slow backing means more time to correct and more time to stop. Step four: check behind constantly. Watch all your mirrors. If you're not sure what's behind you, stop, get out, and look. Step five: steer carefully. Keep the vehicle on path and don't over-steer. If the trailer starts to drift, turn the wheel in the direction of the drift immediately. Catch it early and only a small correction is needed. And step six: if the vehicle is too far out of position, pull forward and start again. It's easier and far safer to reset than to try to fix a bad backing position while you're still going backward."},{"section":"turning","sectionLabel":"Turning","title":"Turning Radius, Off-Tracking, Visibility, and Planning","contentHTML":"<p><strong>Turning radius</strong> — determines your vehicle's maneuverability. Tighter radius = tighter turns possible. Your turning radius is much tighter without a trailer — get the feel for both.</p><p><strong>Off-tracking</strong> — when the rear wheels of the trailer follow a shorter (inside) path than the front wheels through a curve or turn. The longer the vehicle, the greater the off-tracking. Factors: distance between kingpin and rear trailer wheels, sideways drag of rear tires, and radius of the curve.</p><p><strong>Visibility</strong> — pedestrians, cyclists, and automobiles can move into a blind spot without you noticing. Most tractors have both plane (flat) and convex (curved) mirrors. Even with a convex mirror, you have only <strong>40% visibility to the right</strong>. Use both mirror types together.</p><p><strong>Planning</strong> — plan your route before you leave. In cities, stay on posted truck routes — these are specifically designated for CMVs and help you avoid dangerous intersections.</p><p><strong>Steering</strong> — hold the wheel firmly in both hands on opposite sides. If you don't have a firm grip and you hit a curb, pothole, or suffer a steer tire blowout, the wheel can pull away from your hands. Free play: no more than 10% of the wheel's diameter.</p>","narration":"Before we get to the mechanics of specific turns, there are four things to understand. Turning radius: your vehicle's turning radius determines its maneuverability. A tighter radius means you can make a tighter turn. And without a trailer, your turning radius is much tighter — know the feel of your vehicle both ways. Off-tracking: this is when the rear wheels of the trailer follow a shorter, inside path compared to the front wheels through a curve or turn. The longer the vehicle, the worse the off-tracking. The distance between the kingpin and the rear trailer wheels, the sideways drag of the rear tires, and the radius of the curve all affect how much off-tracking occurs. Visibility: pedestrians, bicyclists, and cars can move into a blind spot without you seeing them. Most tractors have both flat mirrors and convex curved mirrors. Even with a convex mirror, you only have 40 percent visibility to the right. Use both types together and always know where your blind spots are. Planning: plan your route before you leave. In cities, stay on posted truck routes — they're specifically designed for CMVs and help you avoid intersections that aren't designed for the size and turning radius of your vehicle. And steering: hold the steering wheel firmly in both hands on opposite sides. If you lose that grip when you hit a pothole or have a blowout, the wheel can be pulled right out of your hands. Check for free play in the wheel — no more than 10 percent of its diameter."},{"section":"turning","sectionLabel":"Turning","title":"Right Turns: Technique and Common Mistakes","contentHTML":"<p><strong>Executing a right turn:</strong></p><ul><li>Signal at least <strong>100 feet before the turn</strong> (earlier in heavy traffic)</li><li>Slow down approaching the intersection — the sharper the turn, the slower you should be</li><li>Shift into the correct gear before the turn; complete the turn in the same gear</li><li>Pull the tractor-trailer into the intersection before beginning the turn — about <strong>one-half of the rig past the corner</strong> — to account for off-tracking</li><li>Turn the steering wheel and continue scanning ahead and to the sides; pay special attention to the right-side mirrors</li><li>Two methods when the intersection doesn't give you enough turning radius:<ul><li><strong>Button hook (square corner)</strong> — swing wide into an extra lane in the cross street while turning right. Preferred in tight areas.</li><li><strong>Jug handle</strong> — steer left on the street you're on before turning right</li></ul></li><li>Immediately after completing the turn, straighten the wheels</li></ul><p><strong>Common right-turn mistakes:</strong> approaching too fast; turning from the wrong lane; forgetting to downshift; swinging left before turning right; shifting gears while turning; not allowing for off-tracking; not watching the right mirror throughout</p>","narration":"Making a safe right turn involves good judgment, accurate steering, and proper speed and space management. Signal at least 100 feet before the turn — earlier when traffic is heavy. Slow down as you approach the intersection. The sharper the turn, the slower you need to be. Shift into the correct gear before the turn and complete the entire turn in that same gear — that keeps both hands on the wheel. For the turn itself: pull the rig into the intersection before beginning to turn. You want to get about one-half of the rig past the corner before you turn the wheel. This accounts for off-tracking. Continue scanning the road ahead and to the sides throughout the turn. Pay special attention to your right-side mirrors — an impatient driver may try to squeeze into the right lane while you're turning. When the intersection doesn't give you enough room, you have two options. A button hook turn — also called a square corner turn — swings the vehicle wide into an extra lane in the cross street as you make the right turn. This is the preferred method in tight areas. A jug handle turn steers the vehicle left on the street you're currently on before turning right. After the turn is complete, straighten the wheels immediately. Common mistakes: approaching too fast, turning from the wrong lane, forgetting to downshift, swinging left before turning right, shifting gears mid-turn, not allowing for off-tracking, and not watching the right mirror throughout the turn."},{"section":"turning","sectionLabel":"Turning","title":"Left Turns, Curves, and Roundabouts","contentHTML":"<p><strong>Left turns</strong> — better left-side visibility makes them less hazardous than right turns, but still require discipline:</p><ul><li>Signal early; reduce speed approaching the intersection</li><li>Size up the intersection — identify obstacles and oncoming vehicles</li><li>Usually turn from the lane nearest the center line; on one-way streets, use the far-left lane; on multi-lane intersections, use the rightmost of the available turn lanes</li><li>Stay on the right side of your lane; pull halfway past the center of the intersection before beginning the turn</li><li>Watch left-side mirrors; look over your left shoulder; allow for off-tracking</li></ul><p><strong>Curves</strong>:</p><ul><li><strong>Left-traveling curve:</strong> keep the front of the vehicle as close to the outer (right) edge of the road as possible — this keeps the trailer from crossing the center line</li><li><strong>Right-traveling curve:</strong> keep the vehicle close to the center of the road without crossing the center line — this prevents the rear of the vehicle from running off the right side</li></ul><p><strong>Roundabouts</strong> — all traffic flows one direction; entering vehicles yield to traffic in the roundabout:</p><ul><li><strong>Turning right:</strong> position the tractor to the far left of your lane — allows room for off-tracking to the right</li><li><strong>Going straight:</strong> start with tractor on the left side of the lane; drive to the far right as you move forward; stay right as rear wheels exit</li><li><strong>Turning left:</strong> use the left lane; keep tractor to far left; the trailer may ride up onto the truck apron (the raised pavement around the island) — it's designed for this</li><li>Take it slow; watch mirrors throughout; plan before entering</li></ul>","narration":"Left turns are less hazardous than right turns because you have better visibility on the left side — but they still require discipline. Signal early and slow down. Size up the intersection: identify obstacles and oncoming vehicles, decide which lane you need to be in. In most cases you'll turn from the lane nearest the center line. On one-way streets, use the far-left lane. In multi-lane situations, use the rightmost available turn lane. Stay on the right side of your lane and pull halfway past the center of the intersection before beginning the turn. Watch your left-side mirrors throughout and look over your left shoulder. Allow for off-tracking on left turns too. On curves: for a left-traveling curve, keep the front of the vehicle as close to the outer right edge of the road as possible — this keeps the trailer from crossing the center line. For a right-traveling curve, keep the vehicle close to the center of the road without crossing the center line — this prevents the rear of the vehicle from running off the right side. On roundabouts: all traffic flows one direction and entering vehicles yield to traffic already in the roundabout. When turning right, position the tractor to the far left of your lane to allow room for off-tracking to the right. When going straight, start on the left side of the lane, drive toward the right as you move forward, and stay right as your rear wheels exit. When turning left, use the left lane and keep the tractor to the far left. The trailer may ride up onto the truck apron — the raised pavement around the center island — and that's fine. Truck aprons are specifically designed for this. Always take roundabouts slowly and watch your mirrors throughout."},{"section":"highways","sectionLabel":"Restricted Areas and Highway Entry/Exit","title":"Restricted Areas and On/Off Ramps","contentHTML":"<p><strong>Restricted areas</strong> — there will be times when you face restrictions to the front, sides, back, or above your vehicle:</p><ul><li>Continuously scan and use your mirrors</li><li>Pay attention to signs indicating vehicle weight, width, or height limitations</li><li>Include these limitations in your trip planning</li><li>At docks and in parking lots: scan for tight spaces, overhangs, other vehicles, and pedestrians</li></ul><p><strong>On ramps — entering traffic:</strong></p><ol><li>Size up the traffic</li><li>Signal early</li><li>Watch for an opening</li><li>Build up speed to merge smoothly</li><li>Watch all mirrors</li><li>Watch for oncoming traffic — engaging the left turn signal alerts drivers you intend to merge</li></ol><p class=\"footnote\">Some on-ramps have a short upgrade — heavy vehicles may struggle to get up to speed. Plan accordingly.</p><p><strong>Off ramps — leaving the interstate:</strong></p><ol><li>Signal and get into the exit lane <strong>as soon as possible</strong></li><li>Check mirrors to monitor traffic behind you</li><li>Shift down to a lower gear and make the exit</li></ol><div class=\"callout warning\">Curved off-ramps: the posted speed is for automobiles — trucks should travel at least <strong>5 mph less</strong> than the posted ramp speed. Downhill exits that also curve are especially dangerous. Reduce speed <strong>before</strong> entering the curve.</div>","narration":"On restricted areas: you'll encounter restrictions to the front, sides, back, and above your vehicle throughout your career. Continuously scan and use your mirrors. Pay close attention to signs indicating weight, width, or height restrictions. Include these in your trip planning — know the limits before you get to a road, not after you're already on it. At docks and parking lots, scan constantly for tight spaces, overhangs, other vehicles, and pedestrians. On ramps: when entering a freeway or turnpike, size up the traffic first. Signal early to let drivers know you're coming. Watch for a gap. Build up speed to merge smoothly. Watch all your mirrors. And watch for oncoming traffic. Engaging your left turn signal early helps alert drivers that you intend to merge. Some on-ramps have a short upgrade — that makes it harder for a heavy vehicle to get up to speed. Plan for it. Off ramps: signal and get into the exit lane as soon as possible. Check your mirrors to monitor the speed of traffic behind you. Shift down to a lower gear and make the exit. Curved off-ramps are particularly dangerous for trucks. The posted speed is the recommended speed for a passenger car — trucks should travel at least 5 mph below that. Off-ramps that go downhill and curve at the same time are especially risky because the downhill grade makes it hard to reduce speed. Reduce your speed before you enter the curve — not during it."},{"section":"wrap-up","sectionLabel":"Wrap-Up","title":"What You've Covered","contentHTML":"<p>You should now be able to:</p><ul class=\"check-list\"><li>Discuss how to start up and shut down the engine of a tractor-trailer</li><li>Describe how to put a tractor-trailer in motion and come to a complete stop</li><li>Identify ways to maneuver through turns, curves, and roundabouts, and enter/exit highways safely</li><li>Explain how to successfully straight-line back a tractor-trailer</li></ul><p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 5.</p>","narration":"That's the end of Module 4. You should now be able to walk through the proper engine start-up, warm-up, and shutdown procedures. You know how to put a tractor-trailer in motion — releasing the clutch to the friction point, building speed gradually, keeping the vehicle centered. You know how to stop it properly, and how to test the hook-up every time a trailer is connected. You understand the basics of straight-line backing and the six steps that make it safe. You know how to execute right and left turns, navigate curves and roundabouts, and safely enter and exit the interstate. Up next is the Knowledge Check. You need 80 percent to pass this module and unlock Module 5."}];
+const quizData = [{"q":"During engine start-up, if the engine doesn't start within 15–20 seconds, what should the driver do?","opts":["Keep cranking until it starts","Turn the ignition off for at least 1 minute before trying again","Immediately call for maintenance","Pump the accelerator and try again right away"],"ans":1,"exp":"If the engine doesn't start within 15 to 20 seconds, the driver should turn the ignition switch/key off for at least one minute before attempting to start it again. This prevents damage to the starter motor."},{"q":"In warm weather, how quickly should oil pressure reach operating level after starting a CMV engine?","opts":["Within 30 to 60 seconds","Within 3 to 5 seconds","Within 10 to 15 seconds","Within 2 to 3 minutes"],"ans":1,"exp":"In warm weather, oil pressure should reach operating level within 3 to 5 seconds of starting. If it does not, the engine should be shut off immediately to prevent severe damage."},{"q":"At what water temperature is engine warm-up considered complete?","opts":["120°F–140°F","155°F–165°F","170°F–195°F","210°F–220°F"],"ans":2,"exp":"Engine warm-up is complete when the water temperature reaches 170°F–195°F. This temperature is not typically reached by simply idling — the driver should proceed at low RPMs until this range is achieved."},{"q":"When putting a tractor-trailer in motion, how will a driver know the clutch has reached the friction point?","opts":["The vehicle will lurch forward suddenly","The engine RPMs will decrease slightly","A warning light will illuminate on the dashboard","The transmission will automatically shift to the next gear"],"ans":1,"exp":"The friction point is where the clutch begins to engage. A slight decrease in engine RPMs is the sign that the friction point has been reached. The driver should then gradually release the clutch the rest of the way."},{"q":"When a tractor-trailer is in motion with the clutch fully engaged, what should the driver do with the clutch pedal?","opts":["Keep light pressure on it at all times","Remove the foot from the clutch pedal completely","Lightly rest the foot on the pedal without pressing","Keep it halfway depressed for faster shifting"],"ans":1,"exp":"Once the clutch is fully engaged and the vehicle is moving, the driver should take the foot completely off the clutch pedal. Riding the clutch accelerates wear and can cause damage."},{"q":"During straight-line backing, if the vehicle starts to drift off course, what is the correct steering response?","opts":["Apply the brakes immediately and stop","Turn the steering wheel in the direction of the drift as soon as it occurs","Turn the steering wheel in the opposite direction of the drift","Pull forward and restart the maneuver immediately"],"ans":1,"exp":"If the vehicle drifts during backing, the driver should turn the steering wheel in the direction of the drift as soon as it occurs. Only slight movement is required if the drift is caught right away."},{"q":"During straight-line backing, what should a driver do if the vehicle gets too far out of position?","opts":["Continue backing and make large steering corrections","Stop and wait for assistance","Pull the vehicle forward and start the maneuver again","Apply the trailer hand valve to correct the angle"],"ans":2,"exp":"If the vehicle gets too far out of position during backing, the driver should pull forward and start the maneuver again. It is easier and safer to reset than to try to correct a badly positioned vehicle while continuing to back."},{"q":"What is the term for the phenomenon where the rear wheels of a trailer follow a shorter inside path than the front wheels through a turn?","opts":["Jackknifing","Oversteering","Off-tracking","Tail swing"],"ans":2,"exp":"Off-tracking occurs when the wheels on the tractor follow a different (longer) path than the rear trailer wheels through a curve or turn. The rearmost wheels follow the shortest path. The longer the vehicle, the greater the off-tracking."},{"q":"Even with a convex (curved) mirror, a driver has approximately what percentage of visibility to the right side of a tractor-trailer?","opts":["About 10%","About 25%","About 40%","About 60%"],"ans":2,"exp":"Even with a convex mirror, a driver has only about 40% visibility to the right. This is why using both plane (flat) and convex mirrors together is recommended to maximize visibility on all sides."},{"q":"When making a right turn in a tractor-trailer, approximately how far into the intersection should the driver pull before starting to turn the steering wheel?","opts":["Just past the edge of the crosswalk","About one-quarter of the rig past the corner","About one-half of the rig past the corner","Until the entire trailer has entered the intersection"],"ans":2,"exp":"The driver should pull about one-half of the rig past the corner before beginning the turn. This allows room to account for off-tracking and reduces the risk of running over the curb or hitting fixed objects."},{"q":"When approaching a left-traveling curve in a tractor-trailer, where should the front of the vehicle be positioned?","opts":["As close to the center line as possible","As close to the outer (right) edge of the road as possible","In the middle of the lane","On the left edge of the lane to anticipate the curve"],"ans":1,"exp":"When approaching a left-traveling curve, the driver should keep the front of the vehicle as close to the outer (right) edge of the road as possible. This keeps the trailer from crossing over the center line through the curve."},{"q":"What is a 'button hook' turn, and when is it the preferred method?","opts":["A turn where the vehicle swings left before turning right; preferred on wide roads","A turn where the vehicle swings wide into an extra lane in the cross street while turning right; preferred in tight areas","A turn where the vehicle makes a U-turn; preferred when a right turn is blocked","A turn where the driver backs up before proceeding; preferred in urban areas"],"ans":1,"exp":"A button hook turn (also called a square corner turn) is where the vehicle swings wide into an extra lane in the cross street while completing a right turn. It is the preferred method in tight areas where a standard right turn would cause the trailer to hit a curb or fixed object."},{"q":"When navigating a roundabout and turning right, how should a tractor-trailer driver position the tractor as it enters?","opts":["To the far right of the lane, as close to the curb as possible","To the far left of the lane, to allow room for off-tracking to the right","In the center of the lane","In the left lane regardless of intended direction"],"ans":1,"exp":"When turning right in a roundabout, the driver should position the tractor to the far left of the lane. This creates space for the trailer to off-track to the right as the turn is completed without hitting the curb."},{"q":"How much below the posted speed limit should a truck generally travel on a curved off-ramp?","opts":["The posted speed is fine for all vehicles","At least 5 mph less than the posted ramp speed","At least 10 mph less than the posted ramp speed","At least 15 mph less than the posted ramp speed"],"ans":1,"exp":"Curved off-ramp speed limits are set for passenger cars. Trucks should travel at least 5 mph below the posted ramp speed. Downhill exits that also curve are especially dangerous — reduce speed before entering the curve."},{"q":"When leaving the interstate, when should the driver signal and begin moving into the exit lane?","opts":["Within the last 50 feet of the exit","As soon as possible after deciding to exit","Only when the exit is clearly visible","After checking mirrors three times"],"ans":1,"exp":"When leaving an interstate or controlled-access highway, the driver should signal and get into the exit lane as soon as possible. This gives following traffic time to react and gives the driver time to slow down safely before the exit ramp."}];
+
+// ============ ICONS ============
+const ICON_PLAY = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+// ============ STATE ============
+let currentSlide = 0;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+// Audio state — needed for pause/resume
+let audioTimerInterval = null;
+let estimatedDuration = 0;     // seconds — total expected for current narration
+let audioElapsed = 0;          // seconds — accumulated playback time
+let audioPlayStart = 0;        // ms — Date.now() at the moment current play segment started
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;       // <audio> element when USE_MP3 is true
+let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  buildDropdown();
+  buildTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  // Make sure speech is cancelled if the user navigates away
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){
+      link.style.pointerEvents = 'none';
+      link.href = 'javascript:void(0)';
+    } else if(isCompleted || isUnlocked){
+      link.href = '../' + m.folder + '/' + m.file;
+    } else {
+      link.href = 'javascript:void(0)';
+      link.addEventListener('click', e => { e.preventDefault(); });
+    }
+    link.innerHTML = '<div class="dropdown-item-status"></div>' +
+      '<div class="di-text">' +
+      '<div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div>' +
+      '<div class="di-title">' + m.title + '</div>' +
+      '</div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 33 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => {
+    if(!wrap.contains(e.target)){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){
+  viewMode = 'slide';
+  renderSlide(0);
+}
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    <div class="narration-box">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-text">${s.narration}</div>
+      <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">← Previous</button>
+      <div class="lock-msg" id="lockMsg">🔒 Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check →' : 'Next →'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  // If this slide was already completed, mark audio as complete and skip playback
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true /* skipUnlock - already unlocked */);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0 /* from beginning */);
+  }
+}
+
+// ============ AUDIO PLAYBACK ============
+// Two modes: USE_MP3 (HTMLAudioElement, full pause/resume support) or
+// browser TTS (SpeechSynthesisUtterance — pause/resume is unreliable cross-browser,
+// so we approximate with cancel-and-restart-from-elapsed-position).
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  if(USE_MP3){
+    const file = AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration){
+        currentAudio.currentTime = fromElapsedSeconds;
+      }
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){
+    onAudioComplete(false);
+    return;
+  }
+  // If resuming from a non-zero position, slice the remaining text based on the
+  // ratio of elapsed-to-total. This is approximate but works for any browser.
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    const words = text.split(/\s+/);
+    textToSpeak = words.slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){
+    onAudioComplete(false);
+  }
+}
+
+function togglePlayPause(){
+  if(isComplete) return; // button is disabled once complete; safety check
+  if(isPlaying){
+    pauseAudio();
+  } else {
+    resumeAudio();
+  }
+}
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  // Capture elapsed up to this moment
+  if(audioPlayStart > 0){
+    audioElapsed += (Date.now() - audioPlayStart) / 1000;
+    audioPlayStart = 0;
+  }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){
+    currentAudio.pause();
+  } else if(window.speechSynthesis){
+    // Null out callbacks BEFORE cancelling so the browser's interruption-triggered
+    // onerror/onend does not call onAudioComplete and falsely complete the slide.
+    if(currentUtterance){
+      currentUtterance.onend = null;
+      currentUtterance.onerror = null;
+      currentUtterance = null;
+    }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => {
+      // If the audio element is broken, restart from the elapsed point via TTS
+      playTTS(currentNarrationText, audioElapsed);
+    });
+  } else {
+    // TTS: restart from the elapsed-position offset
+    playTTS(currentNarrationText, audioElapsed);
+  }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){
+  const words = text.split(/\s+/).length;
+  return Math.max(8, (words / 155) * 60);
+}
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying){ return; }
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    // Fallback: if engine doesn't fire onend (Firefox TTS quirk), unlock anyway
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]){
+      onAudioComplete(false);
+    }
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true;
+  isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){
+    unlockStatus[currentSlide] = true;
+  }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '✓ Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){
+    currentUtterance.onend = null;
+    currentUtterance.onerror = null;
+    currentUtterance = null;
+  }
+  if(window.speechSynthesis){ window.speechSynthesis.cancel(); }
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false;
+  audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1){ renderSlide(currentSlide + 1); }
+  else { startQuiz(); }
+}
+
+function prevSlide(){ if(currentSlide > 0){ renderSlide(currentSlide - 1); } }
+
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+// ============ QUIZ ============
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '✓ Correct' : '✗ Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results →' : 'Next Question →') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else { showResults(); }
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){
+    Progress.markComplete(CURRENT_MODULE_SLUG, pct);
+    buildDropdown();
+  }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You\'ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You\'ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you\'ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
+              : '<a class="btn btn-next" href="../index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    const panel = document.getElementById('slidePanel');
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '✓ You answered correctly' : '✗ You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">← Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next →'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>

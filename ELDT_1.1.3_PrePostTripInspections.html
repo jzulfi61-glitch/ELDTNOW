@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Module 3 · Pre- and Post-Trip Inspections</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding-left:14px;margin:18px 0;background:#fffdf6;padding:12px 16px;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.class-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.class-letter{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1;background:var(--navy);color:var(--accent);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.class-desc{font-size:14px;color:var(--text);line-height:1.45}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.formula-box{background:#0d1b2a;color:#fff;border-radius:8px;padding:20px;margin:18px 0}
+.formula{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-align:center;padding:10px 0;color:var(--accent);letter-spacing:1px}
+.formula-key{list-style:none;margin:14px 0 0 0!important;font-size:14px;color:rgba(255,255,255,.85)}
+.formula-key li{padding:4px 0 4px 20px;position:relative;line-height:1.5;margin:0!important}
+.formula-key li::before{content:"•";position:absolute;left:0;color:var(--accent)}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td.ok{color:var(--success);font-weight:700}
+.data-table td.bad{color:var(--danger);font-weight:700}
+
+/* ---- Narration box with pause/play control ---- */
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <span><strong>UNIT 1.1.3</strong> Pre- and Post-Trip Inspections</span>
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 33 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 33 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="../index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <div class="welcome-eyebrow">Module 3 · Unit 1.1.3</div>
+      <h1>Pre- and Post-Trip Inspections</h1>
+      <div class="welcome-unit">Find the problems before the problems find you</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul>
+          <li>Conduct an accurate and efficient pre-trip inspection using the five-step process</li>
+          <li>Explain when an on-the-road inspection is required and how to complete one</li>
+          <li>Complete a proper post-trip inspection</li>
+          <li>Explain when a Driver Vehicle Inspection Report (DVIR) is required and how to complete one</li>
+        </ul>
+      </div>
+      <button class="btn-start" onclick="startCourse()">Begin Course</button>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>
+      <span>Knowledge Check</span>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ============ CONFIG ============
+const USE_MP3 = false;
+const AUDIO_BASE_PATH = './audio/';
+const NARRATION_RATE = 0.95;
+
+// ============ CROSS-MODULE PROGRESS SYSTEM ============
+// Tracks completion of all 33 modules. Currently localStorage-based.
+// To migrate to a backend account system later, replace the four method
+// bodies below with API calls. The rest of the application code does not
+// need to change.
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  }
+};
+
+// ============ MODULE-LEVEL DATA ============
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","folder":"module1","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","folder":"module2","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","folder":"module3","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","folder":"module4","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","folder":"module5","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","folder":"module6","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","folder":"module7","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"pending"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","folder":"module8","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","folder":"module9","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","folder":"module10","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","folder":"module11","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","folder":"module12","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","folder":"module13","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","folder":"module14","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","folder":"module15","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control/Recovery, Jackknifing, and Other Emergencies","folder":"module16","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","folder":"module17","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","folder":"module18","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","folder":"module19","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","folder":"module20","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","folder":"module21","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","folder":"module22","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","folder":"module23","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","folder":"module24","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","folder":"module25","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":26,"slug":"external-communications","unit":"1.5.6","title":"External Communications","folder":"module26","file":"ELDT_1.5.6_ExternalCommunications.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":27,"slug":"whistleblower-coercion","unit":"1.5.7","title":"Whistleblower/Coercion","folder":"module27","file":"ELDT_1.5.7_WhistleblowerCoercion.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":28,"slug":"trip-planning","unit":"1.5.8","title":"Trip Planning","folder":"module28","file":"ELDT_1.5.8_TripPlanning.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":29,"slug":"drugs-alcohol","unit":"1.5.9","title":"Drugs/Alcohol","folder":"module29","file":"ELDT_1.5.9_DrugsAlcohol.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":30,"slug":"medical-requirements","unit":"1.5.10","title":"Medical Requirements","folder":"module30","file":"ELDT_1.5.10_MedicalRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"}];
+const CURRENT_MODULE_SLUG = 'pretrip-posttrip-inspections';
+const slides = [{"section":"getting-started","sectionLabel":"Getting Started","title":"Welcome to Pre- and Post-Trip Inspections","contentHTML":"<p>A thorough vehicle inspection doesn't just keep you compliant — it keeps you moving.</p><p>Mechanical failures, costly breakdowns, and accidents are often traced back to problems that were there long before the truck left the yard.</p><p class=\"emphasis\">The driver who inspects well is the driver who delivers on time and gets home safe.</p>","narration":"Welcome to Module 3 — Pre- and Post-Trip Inspections, Unit A1.1.3 of the federal ELDT curriculum. A thorough vehicle inspection isn't just a regulatory requirement — it's one of the most practical things you can do as a professional driver. Mechanical failures, breakdowns, and accidents are frequently traced back to problems that existed before the truck ever left the yard. The driver who inspects well is the driver who delivers on time and gets home safe. In this module we'll walk through every required inspection — pre-trip, on-the-road, and post-trip — and the DVIR process."},{"section":"getting-started","sectionLabel":"Getting Started","title":"What You'll Learn","contentHTML":"<p>By the end of this module, you will be able to:</p><ul><li>Conduct an accurate and efficient pre-trip inspection using the five-step process</li><li>Explain when an on-the-road inspection is required and how to complete one</li><li>Complete a proper post-trip inspection</li><li>Explain when a Driver Vehicle Inspection Report (DVIR) is required and how to complete one</li></ul>","narration":"Here's what you're going to take away from this module. First, you'll be able to conduct a complete pre-trip inspection using the five-step process. Second, you'll know when the FMCSRs require an on-the-road inspection and how to complete one. Third, you'll know how to do a proper post-trip inspection. And fourth, you'll understand when a Driver Vehicle Inspection Report is required, what has to be in it, and how to complete one."},{"section":"why-inspect","sectionLabel":"Why Inspections Matter","title":"The Value of a Good Inspection","contentHTML":"<p>Proper vehicle inspections serve three purposes:</p><ul><li><strong>Safety</strong> — catch problems before they cause a breakdown or accident</li><li><strong>Compliance</strong> — vehicle maintenance is one of the seven categories rated under FMCSA's Compliance, Safety, Accountability (CSA) program</li><li><strong>Efficiency</strong> — avoid costly roadside repairs and delivery delays</li></ul><div class=\"callout warning\">Vehicle maintenance violations are frequently cited during roadside inspections — and a thorough inspection program can help you avoid citations and out-of-service orders.</div><p><strong>Always inspect in low-traffic areas:</strong> the yard of a motor carrier, shipper, or receiver; a truck stop or rest area parking lot. Never inspect alongside a road. Wear a reflective vest during any exterior inspection.</p>","narration":"Proper vehicle inspections serve three purposes. First, safety — catching problems before they cause a breakdown or accident. Second, compliance — vehicle maintenance is one of the seven categories that FMCSA rates motor carriers on under the Compliance, Safety, Accountability program. Maintenance violations are frequently cited during roadside inspections, and a solid inspection program helps you avoid citations and out-of-service orders. Third, efficiency — finding problems at the yard means no costly roadside repairs and no delayed deliveries. Always conduct inspections in low-traffic areas: the yard of a motor carrier, shipper, or receiver; a truck stop or rest area parking lot. Never inspect alongside a road. And wear a reflective vest whenever you're outside the cab."},{"section":"types","sectionLabel":"Types of Required Inspections","title":"Three Required Inspections","contentHTML":"<p>The FMCSRs require three types of vehicle inspection:</p><div class=\"class-grid\"><div class=\"class-card\"><div class=\"class-letter\" style=\"font-size:28px\">PRE</div><div class=\"class-desc\"><strong>Pre-Trip Inspection</strong> (§392.7, §392.8, §396.13) — performed before taking the vehicle on the road. Identifies problems that could cause a breakdown or accident before the route begins.</div></div><div class=\"class-card\"><div class=\"class-letter\" style=\"font-size:28px\">EN</div><div class=\"class-desc\"><strong>On-the-Road / En-Route Inspection</strong> (§392.9) — helps you spot problems while there's still time to manage them before they result in a breakdown or accident.</div></div><div class=\"class-card\"><div class=\"class-letter\" style=\"font-size:28px\">POST</div><div class=\"class-desc\"><strong>Post-Trip Inspection</strong> (§396.11) — conducted at the end of the day's work. Includes completing a DVIR if defects or deficiencies are discovered.</div></div></div>","narration":"The FMCSRs require three types of inspection. The pre-trip inspection is performed before you take the vehicle out on the road. It identifies problems before they become breakdowns or accidents. The on-the-road, or en-route, inspection helps you spot problems while there's still time to manage them. Equipment can deteriorate during a long day — the en-route inspection keeps you ahead of it. And the post-trip inspection is conducted at the end of the day. It includes filling out a Driver Vehicle Inspection Report if you find any defects or deficiencies. This is what helps the motor carrier make necessary repairs before the next driver takes the truck out."},{"section":"pretrip","sectionLabel":"Pre-Trip Inspection","title":"What You Must Inspect and Do Before Driving","contentHTML":"<p>Under §392.7, you must inspect and verify these items are in good working order before driving:</p><ul><li>Service brakes (including trailer brake connections), parking brakes, steering mechanism</li><li>Lighting devices and reflectors, tires, horn, windshield wiper(s), rear-vision mirror(s)</li><li>Coupling devices, wheels and rims, emergency equipment</li></ul><p class=\"footnote\">Regulatory requirements are the minimum. A thorough five-step inspection covers all of these as part of a professional routine.</p><p><strong>Before driving, you must:</strong></p><ul><li>Be satisfied the vehicle is in safe operating condition</li><li>Review the last vehicle inspection report (from the previous driver)</li><li>Sign the report (only if defects were noted) to acknowledge you've reviewed it and that repairs have been performed</li></ul><div class=\"callout\">Once mastered, the five-step pre-trip inspection should take about <strong>15 to 20 minutes</strong>.</div>","narration":"Section 392.7 lists the items you must inspect before driving a commercial motor vehicle. Service brakes including trailer brake connections. Parking brakes. Steering mechanism. Lighting devices and reflectors. Tires. Horn. Windshield wipers. Rear-vision mirrors. Coupling devices. Wheels and rims. And emergency equipment. The regulatory requirements are the minimum — a professional driver covers all of these as part of a thorough routine. Before you drive, you also have to be satisfied the vehicle is in safe operating condition, review the last inspection report from the previous driver, and sign it if defects were noted — signing confirms you've reviewed it and that required repairs have been completed. Once you've mastered the five-step process, it should take you about 15 to 20 minutes."},{"section":"step1","sectionLabel":"Step 1 — Engine Compartment & Front Axle","title":"Step 1: Engine Compartment and Front Axle","contentHTML":"<p><strong>Before you begin:</strong> set the parking brakes, put keys in your pocket, chock the wheels, open the hood.</p><p><strong>Engine compartment (passenger side first, then driver's side):</strong></p><ul><li>Fluid levels (oil, coolant, washer, transmission) between \"add\" and \"full\" lines</li><li>Hoses — not leaking, worn, or loose</li><li>Belts — not worn or loose; check slack by pushing mid-span (generally less than one inch of play)</li><li>Alternator — mounting bolts tight, wiring good, no cracking or charring</li><li>Exhaust system — secure, not leaking, free of cracks or excessive soot, not touching wires or fuel/air lines</li><li>Turbocharger — not cracked, damaged, or leaking</li><li>Air conditioning compressor — mounts tight, belt riding on pulleys correctly</li><li>Air compressor — check for leaks, confirm all connections are good, air line not cracked or frayed</li><li>Power steering — fluid level, steering column play, U-joints, pitman arm, ball joints, drag link</li></ul>","narration":"Step 1 is the engine compartment and front axle. Before you start: set the parking brakes, put the keys in your pocket, chock the wheels, and open the hood. Under the hood, start on the passenger side. Check all fluid levels — they need to be between the add and full lines. That includes oil, coolant, washer fluid, and transmission fluid. Check hoses for leaks, wear, or looseness. Check belts for wear and slack — generally you want less than an inch of play at mid-span. Check the alternator, the exhaust system, the turbocharger, and the air conditioning compressor. Check the air compressor — it drives all the air systems on the truck. If it's damaged, nothing downstream works properly. And check the power steering components: fluid level, steering column play, U-joints, pitman arm, ball joints, and drag link."},{"section":"step1","sectionLabel":"Step 1 — Engine Compartment & Front Axle","title":"Step 1: Front Axle Components","contentHTML":"<p><strong>Front axle — passenger side and driver's side:</strong></p><ul><li><strong>Suspension:</strong> front hanger, U-bolts, rear hanger and shackle, springs — intact, tight, not cracked</li><li><strong>Shock absorber</strong> — not loose; shock tower not cracked; bushings good; no leaking fluid</li><li><strong>Tie rod end / steering arm</strong> — tight, castle pins in place, nothing bent</li><li><strong>Brake assembly:</strong> air tank firmly mounted; air brake lines not cracked/frayed; brake chambers not cracked; pushrod/adjuster in good order; slack adjusters have appropriate free play (max 1 inch on pushrod when brakes released); brake shoes at least <strong>¼-inch lining</strong>; brake drum/pads free of grease, oil, or cracks</li><li><strong>Rims</strong> — inside free of oil/grease; outside not cracked or bent; no illegal welds</li><li><strong>Tires</strong> — steer tires must have more than <strong>4/32-inch tread depth</strong>; check for missing chunks, cuts, bruising, uneven wear; use a tread-depth gauge when possible</li><li><strong>Tire pressure</strong> — use a gauge when tires are cold (hot tires read 5–20% high)</li><li><strong>Lug nuts</strong> — tight; watch for shiny metal, rust, or corrosion that signals looseness</li><li><strong>Hub oil level</strong> — above the bottom edge of the sight glass</li></ul>","narration":"For the front axle — check both the passenger side and the driver's side the same way. Check the suspension: the front hanger, U-bolts, rear hanger, and springs need to be intact, tight, and not cracked. Check the shock absorber, the tie rod end, and the steering arm. For the brake assembly: the air tank must be firmly mounted, brake lines not cracked or frayed, brake chambers not cracked or damaged, pushrod and adjuster in good order — maximum one inch of free play on the pushrod when brakes are released. Brake shoes need at least a quarter-inch of lining. Brake drum or pads must be free of grease, oil, or cracks. Check the rims inside and out — no oil or grease inside, no cracks or bends outside, no illegal welds. Steer tires must have more than 4/32 of an inch of tread depth. Check tire pressure when tires are cold — a hot tire reads five to twenty percent high. Lug nuts must be tight — shiny metal or new rust means they may be loose. And hub oil must be above the bottom of the sight glass."},{"section":"step2","sectionLabel":"Step 2 — In-Cab Inspection","title":"Step 2: In-Cab Inspection","contentHTML":"<p>At the driver's side door, ensure:</p><ul><li>Vehicle registration is valid and all needed paperwork is present</li><li>Annual inspection sticker (or report) is present and valid</li><li>Fire extinguisher — mounted, accessible, fully charged, appropriate for the cargo (UL rating: at least <strong>5 B:C</strong>; for hazmat: at least <strong>10 B:C</strong>)</li><li>Safety equipment is accounted for and secured (three reflective triangles, spare fuses, personal protective equipment)</li></ul><p>Climb in using three points of contact, then check:</p><ul><li>Windows — clean, crack-free, no visual obstructions</li><li>Seat — adjusted so you can reach all controls comfortably</li><li>Seat belt — functional; mirrors clean, tight, and well-adjusted</li><li>Gauges (engine running, transmission in neutral) — oil pressure comes up in seconds; coolant temp low and rising; tach around 600 RPM at idle; speedometer reads zero; primary and secondary air pressure building; ammeter and voltmeter positive</li><li>All switches — flashers, blower motor, heater, defroster — cycle on and off</li><li>ABS indicator — not lit; city horn and air horn working; wipers on and washer fluid working</li><li>Steering wheel free play — no more than <strong>10% of the wheel's diameter</strong> (2 inches or less on a 20-inch wheel)</li><li>Clutch, accelerator, brake pedals, and transmission controls — no looseness, sticking, or damage</li></ul>","narration":"Step 2 is the in-cab inspection. At the driver's door: verify the registration is valid and all paperwork is in order, the annual inspection sticker is present and valid, the fire extinguisher is mounted, accessible, fully charged — at least 5 B:C for most cargo, at least 10 B:C for hazmat — and all safety equipment including three reflective triangles, spare fuses, and personal protective gear is accounted for and secured. Climb in using three points of contact. Check windows — clean, crack-free, no obstructions. Adjust your seat. Check your seat belt. With the transmission in neutral, start the engine. Check all gauges: oil pressure should come up in seconds, coolant temperature starts low and rises, tach should read around 600 RPM at idle, both air pressure gauges should be building, ammeter and voltmeter positive. Cycle all switches — flashers, blower, heater, defroster. Verify the ABS light is not lit. Test both horns. Turn on wipers and test washer fluid. Check steering wheel free play — no more than 10 percent of the wheel's diameter, which is two inches or less on a 20-inch wheel. And inspect the clutch, accelerator, brake pedals, and transmission controls for looseness, sticking, or damage."},{"section":"step3","sectionLabel":"Step 3 — Lights","title":"Step 3: Lights Check","contentHTML":"<p>Inoperative lights are a commonly cited violation — and easy for officers to spot.</p><p>Complete this sequence:</p><ol><li>Parking brake set — turn on <strong>low-beam headlights + emergency flashers</strong>. Get out and verify lights on, appropriately aimed, four-ways working.</li><li>Switch to <strong>high-beam headlights</strong>. Get out and verify they work and are appropriately aimed.</li><li>Move to the back of the trailer — verify <strong>tail lights</strong> and <strong>rear emergency flashers</strong>.</li><li>Turn on <strong>parking lights</strong>. Walk around and verify all parking, clearance, side-marker, and identification lights are secure and functioning.</li><li>Check all <strong>turn signals</strong> — front, side, and rear, both left and right.</li><li>Verify <strong>brake lights</strong> are functioning (have a helper or back against something reflective).</li></ol><div class=\"callout warning\">A loose or damaged tail light can cause the entire trailer lighting system to fail — the vehicles behind you won't know when you're turning, stopping, or changing lanes.</div>","narration":"Step 3 is the lights check. Inoperative lights are one of the most commonly cited violations at a roadside inspection, and they're easy for officers to spot. Here's the sequence. Set the parking brake. Turn on your low-beam headlights and emergency flashers. Get out and verify the lights are on, appropriately aimed, and the four-ways are working. Switch to high beams and get out to confirm they work and are aimed correctly. Move around to the back of the trailer and verify the tail lights and rear emergency flashers. Turn on the parking lights and walk around the entire truck — parking lights, clearance lights, side-marker lights, and identification lights all need to be secure and functioning. Then check all turn signals — front, side, and rear, both left and right. And verify the brake lights. That last one is hardest to check alone — have a helper, or back up against something reflective. A loose or damaged tail light can knock out the entire trailer lighting system, leaving the vehicles behind you with no warning of your turns, stops, or lane changes."},{"section":"step4","sectionLabel":"Step 4 — Walk-Around","title":"Step 4: Walk-Around (Tractor and Coupling Area)","contentHTML":"<p>Start at the front of the tractor. Check top, down, then under — all the way around.</p><p><strong>Front and driver's side of tractor:</strong></p><ul><li>Truck not leaning (indicates suspension, frame, flat tire, or cargo shift)</li><li>Windshield — not cracked or chipped; wiper blades snug and in good condition</li><li>Bumper secure; license plate legible and attached; body free of damage; no fluid leaks on the ground</li><li>Door operates properly; weather seal in place; company name and USDOT number visible</li><li>Access ports, steps, side fairing in good condition; batteries secured and not leaking</li><li>Fuel tank — visually verify level matches cab gauge; fuel cap tight; steps, mountings, and strapping tight; no fuel leaks</li><li>Air lines (tractor to trailer) — connections good, lines not rubbing; emergency line loose or damaged → trailer brakes lock up; service line loose or damaged → serious leak under braking + drained air tanks</li><li>Glad hand seals — pull off and examine; replace if kinked, cut, or torn; only <em>rotate</em> when connecting, never push or pull</li><li>Trailer light connection locked into place; exhaust bracket mounts and cab air ride suspension in good condition</li></ul>","narration":"Step 4 is the walk-around. Start at the front of the tractor and work your way around — check top, down, then under at each position. At the front: verify the truck isn't leaning. Leaning usually means a suspension problem, frame issue, flat tire, or cargo shift. Check the windshield for cracks and chips, the wiper blades for fit and condition, and the bumper for security. Verify the license plate is legible, the body is free of damage, and there are no fluid leaks on the ground. On the driver's side: the door should operate correctly and the weather seal should be in place. Check that your company name and USDOT number are visible. Look over access ports, steps, and side fairing. Check the batteries — secured and not leaking. At the fuel tank: visually verify the fuel level matches what the gauge showed inside the cab. Make sure the fuel cap is tight and there are no fuel leaks underneath. Check the air lines from the tractor to the trailer. If the emergency line is loose or damaged, the trailer brakes can lock up. If the service line is loose or damaged, you'll have a serious air leak under braking — that drains your air tanks fast. Pull the glad hands off and examine the seals. Replace any that are kinked, cut, or torn. Only rotate them when connecting — never push or pull."},{"section":"step4","sectionLabel":"Step 4 — Walk-Around","title":"Step 4: Walk-Around (Frame, Fifth Wheel, Drive Axles, and Trailer)","contentHTML":"<p><strong>Frame and coupling area:</strong></p><ul><li>Frame rails and cross members — not cracked, bent, or damaged; trailer header rivets tight, seams good</li><li>Top rail and bottom frame rail — free of damage; apron and apron bolts in good condition</li><li>Fifth wheel — pins locking it in place (if sliding); horizontal and vertical bolts tight; angle irons and flat metal free of cracks; jaws closed around the kingpin shank; locking mechanism in place</li></ul><p><strong>Driver's side drive axles and trailer:</strong></p><ul><li>Drive line, drive shaft, U-joints, and differentials in good condition</li><li>Suspension: front/rear hangers, U-bolts, springs intact; shock absorbers intact; air ride bags not leaking; landing gear mounting iron and bracing in good shape</li><li>Drive tires — tread more than <strong>2/32 inch</strong> (vs. 4/32 for steer tires); inspect brake assembly, rims, lug nuts; check differentials and hubs for leaks</li><li>Landing gear — all the way up, handle working and stowed, no damaged welds or bolts</li><li>Trailer driver's side: conspicuity markings, cross members, air lines, electrical bundles, trailer skirt secure, ABS light mounted and not lit</li><li>Slider assembly — front/rear axles, slider linkage, frame carriage, and locking pins all in good shape</li></ul><p><strong>Rear and passenger side of trailer:</strong></p><ul><li>Back bumper, stop bar, step tread in good condition; rear mud flaps not torn or dragging</li><li>Required ID markers and conspicuity tape present; door frame in good condition</li><li>Passenger side of trailer — same inspection as driver's side (tires, rims, hubs, conspicuity, cross members, air lines, electrical, skirt, header, coupling device area)</li></ul>","narration":"Continuing the walk-around. Check the frame rails and cross members — nothing cracked, bent, or damaged. Look at the trailer header: rivets tight, seams good. Check the top rail and bottom frame rail for damage, and the apron and apron bolts. The fifth wheel is critical — get this right or you'll lose the trailer at the first hard turn or big bump. Verify the pins are locking the fifth wheel in place. Check all bolts, the angle irons, and crawl under to confirm the jaws are closed around the kingpin shank and the locking mechanism is engaged. Check the drive line, drive shaft, U-joints, and differentials. Check the suspension on the drive axles: hangers, U-bolts, springs, shock absorbers, air ride bags. Drive tire tread needs to be more than 2/32 of an inch — compared to 4/32 for steer tires. Check landing gear: all the way up, handle stowed, no damaged welds. On the trailer driver's side: conspicuity markings in place, cross members good, air lines and electrical bundles protected, trailer skirt secure, ABS light mounted and not lit. Check the slider assembly — all locking pins in place. At the back: rear bumper, stop bar, step tread, and mud flaps all good. Required ID markers and conspicuity tape present. Door frame in good condition. Then check the entire passenger side of the trailer the same way you did the driver's side."},{"section":"step5","sectionLabel":"Step 5 — Brake System Check","title":"Step 5: The Brake System Check (LAB-PS)","contentHTML":"<p>This inspection is called the <strong>LAB-PS check</strong>: Leaks, Alarms, Button pop-out, Parking brakes, Service brakes.</p><ol><li><strong>Wheels still chocked</strong> → idle until air pressure is over 100 psi</li><li>Release parking brake; charge trailer brakes; apply foot brake; turn off engine</li><li><strong>Leaks:</strong> Watch gauges for 60 seconds — should NOT leak more than <strong>4 psi/minute</strong> (3 psi for tractor only)</li><li><strong>Alarms:</strong> Turn key back on; pump pressure down — low-pressure warning should activate <strong>before 60 psi</strong></li><li><strong>Button pop-out:</strong> Continue pumping — brake buttons should pop out between <strong>20–40 psi</strong></li><li>With clutch in, shifter in neutral: start up; rev to ~1,400 RPM — air pressure should rebuild from 85 to 100 psi in <strong>less than 45 seconds</strong></li><li><strong>Remove wheel chocks</strong>, then test parking and service brakes:<ul><li>Tug forward in lowest gear against locked trailer brakes (tractor brake released) — trailer should hold</li><li>Tug against locked tractor brakes (trailer brake released) — tractor should hold</li><li>Release all parking brakes, roll slowly, step on foot brake — vehicle should stop without pulling to one side or having a delay</li></ul></li></ol>","narration":"Step 5 is the brake system check, and it goes by the acronym LAB-PS — Leaks, Alarms, Button pop-out, Parking brakes, Service brakes. With the wheels still chocked, idle the truck until air pressure is over 100 psi. Release the parking brake, charge the trailer brakes, apply the foot brake, and shut the engine off. Watch the gauges for a full 60 seconds — the system should not leak more than 4 psi per minute, or 3 psi for a tractor alone. That's the Leaks check. Turn the key back on and pump the pressure down. The low-pressure warning alarm should activate before 60 psi — that's the Alarms check. Keep pumping — the brake buttons should pop out between 20 and 40 psi — that's the Button pop-out check. Then with the clutch in and the shifter in neutral, start the engine and rev to about 1,400 RPM. Pressure should rebuild from 85 to 100 psi in less than 45 seconds. Now remove the wheel chocks. Test the Parking brakes: release the tractor brake and tug forward in the lowest gear against locked trailer brakes — the trailer should hold. Then engage the tractor brake, release the trailer brake, and tug forward — the tractor should hold. And test the Service brakes: release all parking brakes, roll forward slowly, and step on the foot brake — the vehicle should stop without pulling to one side or having any delay."},{"section":"onroad","sectionLabel":"On-the-Road Inspection","title":"On-the-Road (En-Route) Inspection (§392.9)","contentHTML":"<p>Equipment can deteriorate during a trip. On-the-road inspections help you spot problems before they become breakdowns or accidents.</p><p><strong>What to do every time you stop:</strong></p><ul><li>Get off the road and park in a safe location</li><li>Walk around the vehicle at a walking pace — pause at each axle group</li><li>Quick scan of all lights, mirrors, and tires</li><li>Use a <strong>hammer or tire thumper</strong> to check tire firmness; feel near the hub for excessive heat (don't touch — you could burn your hand)</li><li>Engage all your senses — unusual sounds, smells, or feel of the vehicle should prompt a stop</li></ul><p><strong>Cargo and load-securing devices must be checked:</strong></p><ul><li>Within the <strong>first 50 miles</strong> of a trip</li><li>After that: when you change duty status, after <strong>3 hours</strong> of driving, or after <strong>150 miles</strong> — whichever comes first</li></ul><p class=\"footnote\">Inspection not required if the vehicle is sealed with orders not to open, or if the load makes inspection impossible — but this doesn't excuse you from checking the vehicle's condition.</p>","narration":"On-the-road inspections are required under section 392.9. Even after a thorough pre-trip, equipment can deteriorate during the day. Make it a habit to stop every few hours and check the truck. Every time you stop: get off the road and park somewhere safe. Walk around the vehicle at a walking pace, pausing at each axle group. Do a quick scan of all lights, mirrors, and tires. Use a hammer or tire thumper to check tire firmness — don't use a pressure gauge on hot tires, they read 5 to 20 percent high. Feel near the hub for excessive heat, but don't touch — you'll burn your hand. And engage all your senses. Unusual sounds, smells, or the feel of the vehicle can all tell you something's wrong before the gauges do. For cargo: the FMCSRs require you to check cargo and load-securing devices within the first 50 miles of every trip. After that, check again whenever you change duty status, after 3 hours of driving, or after 150 miles — whichever comes first. If the trailer is sealed or the load makes inspection impossible, you're still required to inspect the vehicle's condition itself."},{"section":"posttrip","sectionLabel":"Post-Trip Inspection","title":"Post-Trip Inspection and the DVIR (§396.11)","contentHTML":"<p>At the end of every work day, conduct a post-trip inspection of every vehicle you operated.</p><p>You'll inspect the same items as the pre-trip, with one exception: <strong>you can't check heat-sensitive items</strong> like oil, tire pressure, brake shoes and drums, hub oil, and exhaust components when they're hot.</p><p>If you find any defect or deficiency that could compromise safe operation, you must:</p><ul><li>Document it on a <strong>Driver Vehicle Inspection Report (DVIR)</strong></li><li>Report it to your motor carrier</li></ul><p><strong>A DVIR must contain:</strong></p><ul><li>Identification of the vehicle (truck/trailer plate or vehicle number)</li><li>A list of defects or deficiencies that could affect safety or cause a breakdown</li><li>Three required signatures: <ol><li>The driver who prepared it</li><li>A mechanic or company official (certifying repairs were completed or not necessary)</li><li>The next driver of the vehicle</li></ol></li></ul><div class=\"callout\">Section 396.11 requires a DVIR whenever a defect or deficiency is discovered. Many carriers require one every day regardless. Check with your company on their policy.</div>","narration":"At the end of every work day, conduct a post-trip inspection of every vehicle you operated. You'll check the same items as the pre-trip, with one exception: you can't check heat-sensitive items like oil, tire pressure, brake shoes, hub oil, and exhaust components — they're too hot. If you find any defect or deficiency that could compromise safe vehicle operation, you must document it on a Driver Vehicle Inspection Report — a DVIR — and report it to your motor carrier. The DVIR must contain three things: an identification of the vehicle, a list of any defects or deficiencies that could affect safety or cause a breakdown, and three signatures. First, the driver who prepared it — you. Second, a mechanic or company official who certifies that repairs were completed or that they inspected the items and determined no repair was necessary. Third, the next driver of the vehicle — even if that next driver is you. Section 396.11 requires a DVIR whenever a defect or deficiency is discovered. Many carriers require one every day regardless of findings."},{"section":"posttrip","sectionLabel":"Post-Trip Inspection","title":"Intermodal Equipment and Special Rigs","contentHTML":"<p><strong>Intermodal equipment DVIR:</strong> If you haul intermodal equipment with a defect or deficiency, complete a DVIR and turn it in to the intermodal equipment provider. The DVIR must include: motor carrier's name, both the motor carrier's and provider's USDOT numbers, a unique ID for the equipment, date/time of report, list of defects, and your signature.</p><p><strong>Special rigs require additional inspection procedures:</strong></p><ul><li><strong>Multiple trailers</strong> — special attention to: air lines, valves, glad hands between trailers; valve positions; brake operation; pintle hook latches; safety chains</li><li><strong>Tankers</strong> — dome covers; hoses and pumps (fastened); valve positions; cap securement; certification tags and test dates (if hazmat); emergency shut-off valves; tank condition; hazmat placards if applicable</li><li><strong>Refrigerated units (Reefers)</strong> — holes in walls, ceiling, or floor; cleanliness; air circulation ducts; door locks and seals; ceiling rail securement; water, oil, and coolant in the refrigeration unit; thermostat</li><li><strong>Intermodal chassis</strong> — tie-down bolsters; locking pins, clevises, clamps, and hooks; secondary latches; sliding frame; connections</li></ul>","narration":"If you're hauling intermodal equipment and you find a defect or deficiency, you complete a DVIR and turn it in to the intermodal equipment provider — not just to your motor carrier. The DVIR has to include the motor carrier's name, both USDOT numbers, a unique identifying number for the equipment, the date and time of the report, a list of defects, and your signature. Different types of special rigs also require additional inspection procedures. For multiple trailers: pay special attention to the air lines, valves, and glad hands between the two trailers, the valve positions, brake operation, and the pintle hook latches and safety chains. For tankers: dome covers, hoses and pumps, valve positions, cap securement, certification tags if hauling hazmat, emergency shut-off valves, the tank itself, and hazmat placards. For refrigerated units — reefers: check for holes in the walls, ceiling, or floor; cleanliness; air circulation ducts; door locks and seals; ceiling rail securement; and water, oil, and coolant levels in the refrigeration unit. For intermodal chassis: tie-down bolsters, locking pins, clevises, clamps, hooks, secondary latches, the sliding frame, and connections."},{"section":"wrap-up","sectionLabel":"Wrap-Up","title":"What You've Covered","contentHTML":"<p>You should now be able to:</p><ul class=\"check-list\"><li>Conduct an accurate and efficient pre-trip inspection using the five-step process</li><li>Explain when an on-the-road inspection is required and how to complete one</li><li>Complete a proper post-trip inspection</li><li>Explain when a Driver Vehicle Inspection Report (DVIR) is required and how to complete one</li></ul><p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 4.</p>","narration":"That's the end of Module 3. You should now be able to conduct a complete pre-trip inspection using all five steps: engine compartment and front axle, in-cab, lights, walk-around, and brake system check. You know when the on-the-road inspection is required — within the first 50 miles, then every 3 hours or 150 miles — and how to complete it. You know what a post-trip inspection covers and what you can and cannot check on a hot truck. And you know when a DVIR is required, what it must contain, and who has to sign it. Up next is the Knowledge Check. You need 80 percent to pass this module and unlock Module 4."}];
+const quizData = [{"q":"Under which FMCSA regulation section are pre-trip inspection requirements found?","opts":["§396.11","§392.7","§383.51","§390.5"],"ans":1,"exp":"Section 392.7 contains the pre-trip inspection requirements, listing the items that must be inspected and verified in good working order before driving a CMV."},{"q":"What is the approximate amount of time a thorough five-step pre-trip inspection should take once a driver has mastered the process?","opts":["About 5 minutes","About 15 to 20 minutes","About 30 to 45 minutes","About 1 hour"],"ans":1,"exp":"Once mastered, the five-step pre-trip inspection should take about 15 to 20 minutes to complete properly."},{"q":"What is the minimum tread depth required for steer tires on a CMV?","opts":["More than 2/32 inch","More than 4/32 inch","More than 6/32 inch","More than 8/32 inch"],"ans":1,"exp":"Steer tires must have more than 4/32 of an inch of tread depth. Drive tires (rear) require more than 2/32 of an inch."},{"q":"During the in-cab inspection, what is the maximum allowable free play in the steering wheel of a 20-inch steering wheel?","opts":["1 inch","2 inches","4 inches","6 inches"],"ans":1,"exp":"Free play in the steering wheel should be no more than 10% of the wheel's diameter. On a 20-inch wheel, that equals 2 inches or less."},{"q":"What is the minimum UL fire extinguisher rating required on a CMV hauling hazardous materials?","opts":["At least 5 B:C","At least 10 B:C","At least 15 B:C","At least 20 B:C"],"ans":1,"exp":"A fire extinguisher must have a UL rating of at least 5 B:C for general cargo. If the CMV is hauling hazardous materials, the rating must be at least 10 B:C."},{"q":"During the Step 5 brake system check (LAB-PS), what is the maximum allowable air pressure loss per minute when the brake check is being performed?","opts":["2 psi per minute","4 psi per minute (3 psi for tractor only)","6 psi per minute","10 psi per minute"],"ans":1,"exp":"During the brake leak check, the vehicle should not lose more than 4 psi per minute (or 3 psi per minute for a tractor-only configuration) over a 60-second period."},{"q":"At what pressure should the low-pressure warning alarm or indicator activate during the LAB-PS check?","opts":["Before pressure drops below 100 psi","Before pressure drops below 60 psi","When pressure drops to exactly 40 psi","When pressure drops to exactly 20 psi"],"ans":1,"exp":"The low-pressure warning alarm or indicator should activate before air pressure drops below 60 psi. This is verified during the Alarms portion of the LAB-PS check."},{"q":"During the LAB-PS check, at what pressure range should the brake buttons (valves) pop out?","opts":["5 to 10 psi","20 to 40 psi","50 to 60 psi","70 to 80 psi"],"ans":1,"exp":"Brake buttons should pop out between 20 and 40 psi, switching the vehicle over from the parking brake to the emergency brake system."},{"q":"Under the FMCSRs, cargo and load-securing devices must first be checked within how many miles of starting a trip?","opts":["25 miles","50 miles","100 miles","150 miles"],"ans":1,"exp":"Section 392.9 requires that cargo and load-securing devices be checked within the first 50 miles of a trip. Any necessary adjustments must be made at that time."},{"q":"After the first 50-mile check, how often must a driver re-examine cargo and load-securing devices?","opts":["Every hour or 50 miles","When changing duty status, after 3 hours of driving, or after 150 miles — whichever comes first","Every 200 miles","Every 4 hours regardless of distance"],"ans":1,"exp":"After the initial 50-mile check, cargo and load-securing devices must be re-examined when the driver changes duty status, after the vehicle has been driven for 3 hours, or after 150 miles — whichever occurs first."},{"q":"Which of the following CANNOT typically be checked during a post-trip inspection that CAN be checked during a pre-trip inspection?","opts":["Tire tread depth","Heat-sensitive items such as tire pressure, oil, brake shoes and drums, and hub oil","Emergency equipment (triangles, flares)","Lighting devices and reflectors"],"ans":1,"exp":"Because the vehicle and components are hot at the end of a trip, heat-sensitive items — tire pressure, oil, brake shoes, brake drums, hub oil, and exhaust components — cannot be accurately checked during a post-trip inspection."},{"q":"Which of the following must a Driver Vehicle Inspection Report (DVIR) contain?","opts":["Only the driver's signature","Vehicle identification, a list of defects/deficiencies, and three required signatures","Only the list of defects found","The route driven and delivery receipts"],"ans":1,"exp":"A DVIR must contain: (1) vehicle identification, (2) a list of any defects or deficiencies affecting safety or likely to cause a breakdown, and (3) three signatures — the driver who prepared it, a mechanic or company official, and the next driver of the vehicle."},{"q":"If a driver is hauling intermodal equipment and discovers a defect, to whom must the completed DVIR be submitted?","opts":["The motor carrier only","The intermodal equipment provider","The FMCSA directly","The nearest law enforcement agency"],"ans":1,"exp":"When hauling intermodal equipment, a DVIR for any discovered defect or deficiency must be submitted to the intermodal equipment provider, not just to the motor carrier."},{"q":"What should a driver do if the glad hand seals are kinked, cut, or torn during a pre-trip inspection?","opts":["Apply duct tape as a temporary fix","Replace the seals before operating the vehicle","Report it on the DVIR but continue driving","Push or pull the glad hands tighter to seal the connection"],"ans":1,"exp":"Kinked, cut, or torn glad hand seals must be replaced. Without an airtight seal, there will be an air leak that prevents the vehicle from maintaining proper air pressure. Glad hands should only be rotated when connecting — never pushed or pulled."},{"q":"During Step 4 of the pre-trip inspection, what is the minimum tread depth requirement for drive tires?","opts":["More than 1/32 inch","More than 2/32 inch","More than 4/32 inch","More than 6/32 inch"],"ans":1,"exp":"Drive tires must have more than 2/32 of an inch of tread depth. This is less than the 4/32-inch requirement for steer tires."}];
+
+// ============ ICONS ============
+const ICON_PLAY = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+// ============ STATE ============
+let currentSlide = 0;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+// Audio state — needed for pause/resume
+let audioTimerInterval = null;
+let estimatedDuration = 0;     // seconds — total expected for current narration
+let audioElapsed = 0;          // seconds — accumulated playback time
+let audioPlayStart = 0;        // ms — Date.now() at the moment current play segment started
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;       // <audio> element when USE_MP3 is true
+let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  buildDropdown();
+  buildTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  // Make sure speech is cancelled if the user navigates away
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){
+      link.style.pointerEvents = 'none';
+      link.href = 'javascript:void(0)';
+    } else if(isCompleted || isUnlocked){
+      link.href = '../' + m.folder + '/' + m.file;
+    } else {
+      link.href = 'javascript:void(0)';
+      link.addEventListener('click', e => { e.preventDefault(); });
+    }
+    link.innerHTML = '<div class="dropdown-item-status"></div>' +
+      '<div class="di-text">' +
+      '<div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div>' +
+      '<div class="di-title">' + m.title + '</div>' +
+      '</div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 33 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => {
+    if(!wrap.contains(e.target)){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){
+  viewMode = 'slide';
+  renderSlide(0);
+}
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    <div class="narration-box">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-text">${s.narration}</div>
+      <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">← Previous</button>
+      <div class="lock-msg" id="lockMsg">🔒 Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check →' : 'Next →'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  // If this slide was already completed, mark audio as complete and skip playback
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true /* skipUnlock - already unlocked */);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0 /* from beginning */);
+  }
+}
+
+// ============ AUDIO PLAYBACK ============
+// Two modes: USE_MP3 (HTMLAudioElement, full pause/resume support) or
+// browser TTS (SpeechSynthesisUtterance — pause/resume is unreliable cross-browser,
+// so we approximate with cancel-and-restart-from-elapsed-position).
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  if(USE_MP3){
+    const file = AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration){
+        currentAudio.currentTime = fromElapsedSeconds;
+      }
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){
+    onAudioComplete(false);
+    return;
+  }
+  // If resuming from a non-zero position, slice the remaining text based on the
+  // ratio of elapsed-to-total. This is approximate but works for any browser.
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    const words = text.split(/\s+/);
+    textToSpeak = words.slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){
+    onAudioComplete(false);
+  }
+}
+
+function togglePlayPause(){
+  if(isComplete) return; // button is disabled once complete; safety check
+  if(isPlaying){
+    pauseAudio();
+  } else {
+    resumeAudio();
+  }
+}
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  // Capture elapsed up to this moment
+  if(audioPlayStart > 0){
+    audioElapsed += (Date.now() - audioPlayStart) / 1000;
+    audioPlayStart = 0;
+  }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){
+    currentAudio.pause();
+  } else if(window.speechSynthesis){
+    // Null out callbacks BEFORE cancelling so the browser's interruption-triggered
+    // onerror/onend does not call onAudioComplete and falsely complete the slide.
+    if(currentUtterance){
+      currentUtterance.onend = null;
+      currentUtterance.onerror = null;
+      currentUtterance = null;
+    }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => {
+      // If the audio element is broken, restart from the elapsed point via TTS
+      playTTS(currentNarrationText, audioElapsed);
+    });
+  } else {
+    // TTS: restart from the elapsed-position offset
+    playTTS(currentNarrationText, audioElapsed);
+  }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){
+  const words = text.split(/\s+/).length;
+  return Math.max(8, (words / 155) * 60);
+}
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying){ return; }
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    // Fallback: if engine doesn't fire onend (Firefox TTS quirk), unlock anyway
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]){
+      onAudioComplete(false);
+    }
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true;
+  isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){
+    unlockStatus[currentSlide] = true;
+  }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '✓ Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){
+    currentUtterance.onend = null;
+    currentUtterance.onerror = null;
+    currentUtterance = null;
+  }
+  if(window.speechSynthesis){ window.speechSynthesis.cancel(); }
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false;
+  audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1){ renderSlide(currentSlide + 1); }
+  else { startQuiz(); }
+}
+
+function prevSlide(){ if(currentSlide > 0){ renderSlide(currentSlide - 1); } }
+
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+// ============ QUIZ ============
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '✓ Correct' : '✗ Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results →' : 'Next Question →') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else { showResults(); }
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){
+    Progress.markComplete(CURRENT_MODULE_SLUG, pct);
+    buildDropdown();
+  }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You\'ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You\'ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you\'ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
+              : '<a class="btn btn-next" href="../index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    const panel = document.getElementById('slidePanel');
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '✓ You answered correctly' : '✗ You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">← Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next →'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>
