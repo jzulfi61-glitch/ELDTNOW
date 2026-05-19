@@ -82,6 +82,8 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 .toc-quiz .toc-check{border-color:var(--border)}
 .toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
 .toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
+.toc-reset:hover{color:var(--danger);background:var(--light)}
 
 .welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
 .welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
@@ -271,6 +273,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
       <div class="toc-check"></div>
       <span>Knowledge Check</span>
     </div>
+    <button class="toc-reset" onclick="resetThisModule()">↺ Reset This Module</button>
   </aside>
 </div>
 
@@ -313,7 +316,13 @@ const Progress = {
     return true;
   },
   saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
-  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } }
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
+  resetModule(slug){
+    const data = this._load();
+    delete data[slug];
+    this._save(data);
+    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
+  }
 };
 
 // ============ MODULE-LEVEL DATA ============
@@ -348,6 +357,13 @@ let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
 
 function saveCurrentState(){
   Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
+function resetThisModule(){
+  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
+    Progress.resetModule(CURRENT_MODULE_SLUG);
+    window.location.reload();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
