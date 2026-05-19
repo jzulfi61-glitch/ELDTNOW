@@ -94,6 +94,30 @@ RESET_BTN_NEW = (
     '  </aside>'
 )
 
+TIMER_OLD = 'window.addEventListener(\'DOMContentLoaded\', init);'
+TIMER_NEW = (
+    "// ── Active-time tracker ──────────────────────────────────────────────────────\n"
+    "(function(){\n"
+    "  let _start = Date.now(), _accum = 0;\n"
+    "  function _flush(){\n"
+    "    const secs = Math.round(_accum + (Date.now() - _start) / 1000);\n"
+    "    _accum = 0; _start = Date.now();\n"
+    "    if(secs < 1) return;\n"
+    "    const data = Progress._load();\n"
+    "    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};\n"
+    "    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;\n"
+    "    Progress._save(data);\n"
+    "  }\n"
+    "  document.addEventListener('visibilitychange', () => {\n"
+    "    if(document.visibilityState === 'hidden'){ _flush(); }\n"
+    "    else { _start = Date.now(); }\n"
+    "  });\n"
+    "  window.addEventListener('beforeunload', _flush);\n"
+    "  setInterval(_flush, 30000);\n"
+    "})();\n\n"
+    "window.addEventListener('DOMContentLoaded', init);"
+)
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def apply_fix(html, check_marker, old, new, label, log):
@@ -198,6 +222,11 @@ def main():
         RESET_BTN_OLD,
         RESET_BTN_NEW,
         'Reset button in sidebar', log)
+
+    html = apply_fix(html, 'Active-time tracker',
+        TIMER_OLD,
+        TIMER_NEW,
+        'Active-time tracker IIFE', log)
 
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(html)

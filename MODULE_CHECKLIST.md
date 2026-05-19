@@ -151,7 +151,37 @@ function resetThisModule(){
 
 ---
 
-### 9 · Update REGISTRY status in all other files
+### 9 · Add active-time tracker
+
+**Find:** `window.addEventListener('DOMContentLoaded', init);`  
+**Replace with:**
+```js
+// ── Active-time tracker ──────────────────────────────────────────────────────
+(function(){
+  let _start = Date.now(), _accum = 0;
+  function _flush(){
+    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
+    _accum = 0; _start = Date.now();
+    if(secs < 1) return;
+    const data = Progress._load();
+    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
+    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
+    Progress._save(data);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden'){ _flush(); }
+    else { _start = Date.now(); }
+  });
+  window.addEventListener('beforeunload', _flush);
+  setInterval(_flush, 30000);
+})();
+
+window.addEventListener('DOMContentLoaded', init);
+```
+
+---
+
+### 10 · Update REGISTRY status in all other files
 
 The script handles this automatically. If done manually: in every other `.html` file (all existing modules + `index.html`), find the REGISTRY entry for this module's slug and change `"status":"pending"` to `"status":"built"`.
 

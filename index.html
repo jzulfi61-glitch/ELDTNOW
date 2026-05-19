@@ -76,6 +76,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 .mod-action-arrow{transition:transform .15s}
 .mod-card:hover:not(.locked) .mod-action-arrow{transform:translateX(4px)}
 .mod-score{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--success);background:var(--success-light);padding:3px 10px;border-radius:12px;font-weight:700;letter-spacing:.5px}
+.mod-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);background:var(--light);padding:3px 8px;border-radius:12px;font-weight:600;letter-spacing:.5px;border:1px solid var(--border)}
 footer{background:var(--navy);color:rgba(255,255,255,.7);padding:32px 28px;text-align:center;font-size:13px;margin-top:auto}
 footer a{color:var(--accent);text-decoration:none}
 .reset-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:6px 14px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:all .15s}
@@ -192,6 +193,14 @@ function render(){
   });
 }
 
+function fmtTime(secs){
+  if(!secs || secs < 30) return '';
+  const m = Math.round(secs / 60);
+  if(m < 1)  return '< 1 min';
+  if(m < 60) return m + ' min';
+  return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+}
+
 function renderCard(m, all, nextModule){
   const rec         = all[m.slug] || {};
   const isCompleted = !!rec.completed;
@@ -205,9 +214,11 @@ function renderCard(m, all, nextModule){
   const actionText = isCompleted ? 'Review module' : isCurrent ? 'Continue' : isUnlocked ? 'Start module' : 'Locked';
   const arrow      = isCompleted ? '↻' : (isCurrent || isUnlocked) ? '→' : '';
   const scoreBadge = isCompleted && rec.quizScore ? '<div class="mod-score">' + rec.quizScore + '%</div>' : '';
+  const t = fmtTime(rec.timeSpent);
+  const timeBadge = t ? '<div class="mod-time">⏱ ' + t + '</div>' : '';
   return '<div class="' + cls + '" data-folder="' + m.folder + '" data-file="' + m.file + '">' +
     '<div class="mod-top"><div class="mod-num">Module ' + m.num + '</div>' +
-    '<div style="display:flex;gap:10px;align-items:center">' + scoreBadge + '<div class="mod-status"></div></div></div>' +
+    '<div style="display:flex;gap:6px;align-items:center">' + timeBadge + scoreBadge + '<div class="mod-status"></div></div></div>' +
     '<div class="mod-body"><div class="mod-title">' + m.title + '</div>' +
     '<div class="mod-unit">Unit ' + m.unit + '</div>' +
     '<div class="mod-action"><span>' + actionText + '</span><span class="mod-action-arrow">' + arrow + '</span></div>' +
