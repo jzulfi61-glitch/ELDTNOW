@@ -308,7 +308,9 @@ const Progress = {
       if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
     }
     return true;
-  }
+  },
+  saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } }
 };
 
 // ============ MODULE-LEVEL DATA ============
@@ -341,10 +343,21 @@ let currentNarrationText = '';
 let currentAudio = null;       // <audio> element when USE_MP3 is true
 let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
 
+function saveCurrentState(){
+  Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
 window.addEventListener('DOMContentLoaded', init);
 
 function init(){
   Progress.markStarted(CURRENT_MODULE_SLUG);
+  const _saved = Progress.loadState(CURRENT_MODULE_SLUG);
+  if(_saved){
+    unlockStatus = (_saved.unlockStatus && _saved.unlockStatus.length === slides.length)
+      ? _saved.unlockStatus : new Array(slides.length).fill(false);
+    if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
+    else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
+  }
   buildDropdown();
   buildTOC();
   setupDropdownToggle();
@@ -472,6 +485,7 @@ function renderSlide(i){
   stopAudio();
   currentSlide = i;
   viewMode = 'slide';
+  saveCurrentState();
   const s = slides[i];
   const panel = document.getElementById('slidePanel');
   panel.innerHTML = `
@@ -681,6 +695,7 @@ function onAudioComplete(skipUnlock){
   setAudioControlDone();
   if(!skipUnlock){
     unlockStatus[currentSlide] = true;
+    saveCurrentState();
   }
   const next = document.getElementById('nextBtn');
   const lock = document.getElementById('lockMsg');
