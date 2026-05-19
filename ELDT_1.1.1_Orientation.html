@@ -24,6 +24,8 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 
 .unit-dropdown{position:relative}
 .unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+.module-counter strong{color:var(--accent);font-weight:700}
 .unit-trigger:hover{background:rgba(255,255,255,.18)}
 .unit-trigger strong{color:var(--accent);margin-right:6px}
 .unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
@@ -234,6 +236,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
       <div class="dropdown-footer"><a href="./index.html">← Back to Course Home</a></div>
     </div>
   </div>
+  <span class="module-counter" id="moduleCounter"></span>
 </header>
 
 <div class="progress-wrap">
@@ -358,6 +361,8 @@ function init(){
     if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
     else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
   }
+  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 33'; }
   buildDropdown();
   buildTOC();
   updateTOC();
