@@ -187,6 +187,77 @@ The script handles this automatically. If done manually: in every other `.html` 
 
 ---
 
+---
+
+## Adding Pictures and Videos to Slides
+
+Media is optional on any slide. Add `image` and/or `video` fields directly to a slide object in the `slides` array. Slides with no media fields render exactly as before — nothing changes.
+
+### Image only
+
+```js
+{
+  section: "primary-controls",
+  sectionLabel: "Primary Controls",
+  title: "Steering Wheel Layout",
+  contentHTML: "<p>The steering wheel is larger than in a car...</p>",
+  narration: "...",
+  image: {
+    src: "./images/steering-wheel.jpg",
+    caption: "Typical CMV steering wheel with horn button"
+  }
+}
+```
+
+Or shorthand (no caption):
+```js
+image: "./images/steering-wheel.jpg"
+```
+
+### Video only
+
+```js
+{
+  ...
+  video: {
+    src: "./videos/pretrip-walkaround.mp4",
+    poster: "./images/pretrip-poster.jpg",
+    caption: "Pre-trip inspection walkaround — watch before proceeding"
+  }
+}
+```
+
+Or shorthand (no poster, no caption):
+```js
+video: "./videos/pretrip-walkaround.mp4"
+```
+
+### Both image and video on the same slide
+
+```js
+{
+  ...
+  image: { src: "./images/dash-diagram.jpg", caption: "Instrument cluster diagram" },
+  video: { src: "./videos/dash-overview.mp4", caption: "Dashboard walkthrough video" }
+}
+```
+
+### File placement
+
+Place media files in subdirectories in the project root:
+- `./images/` — for photos and diagrams
+- `./videos/` — for MP4 clips
+
+### Supported formats
+- **Images**: JPG, PNG, WebP, SVG
+- **Video**: MP4 (H.264) — recommended for broadest browser support
+
+### How replay works
+
+Videos use the browser's native `<video controls>` player (play/pause/seek/volume built in) plus a dedicated **↺ Replay** button overlaid in the bottom-right corner that resets to the beginning and plays automatically.
+
+---
+
 ## localStorage keys (for reference)
 
 | Key | Contents |

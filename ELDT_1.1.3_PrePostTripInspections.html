@@ -136,6 +136,14 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 .data-table tr:last-child td{border-bottom:none}
 .data-table td.ok{color:var(--success);font-weight:700}
 .data-table td.bad{color:var(--danger);font-weight:700}
+.slide-media{padding:0 40px 24px;display:flex;flex-direction:column;gap:18px}
+.slide-figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.slide-img{width:100%;max-height:480px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:#f7f9fb}
+.slide-video-wrap{position:relative;width:100%;background:#000;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.slide-video{width:100%;display:block;max-height:480px}
+.video-replay-btn{position:absolute;bottom:10px;right:10px;background:rgba(13,27,42,.75);color:#fff;border:none;padding:5px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.video-replay-btn:hover{background:var(--accent);color:#000}
+.slide-figure figcaption{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:0 8px}
 
 /* ---- Narration box with pause/play control ---- */
 .narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
@@ -213,6 +221,7 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
   .slide-content{padding:22px 24px}
   .narration-box{margin:16px 24px}
   .slide-nav{padding:16px 24px}
+  .slide-media{padding:0 24px 20px}
   .quiz-panel,.results{padding:24px}
   .dropdown-menu{min-width:300px}
 }
@@ -522,6 +531,35 @@ function startCourse(){
   renderSlide(0);
 }
 
+function renderMediaHTML(s){
+  if(!s.image && !s.video) return '';
+  let out = '<div class="slide-media">';
+  if(s.image){
+    const src = typeof s.image === 'string' ? s.image : s.image.src;
+    const cap = (typeof s.image === 'object' && s.image.caption) ? s.image.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<img class="slide-img" src="' + src + '" alt="' + (cap||'') + '" loading="lazy">'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  if(s.video){
+    const src = typeof s.video === 'string' ? s.video : s.video.src;
+    const poster = (typeof s.video === 'object' && s.video.poster) ? ' poster="' + s.video.poster + '"' : '';
+    const cap = (typeof s.video === 'object' && s.video.caption) ? s.video.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<div class="slide-video-wrap">'
+         + '<video class="slide-video" controls playsinline' + poster + '>'
+         + '<source src="' + src + '" type="video/mp4">'
+         + 'Your browser does not support video playback.</video>'
+         + '<button class="video-replay-btn" onclick="this.previousElementSibling.currentTime=0;this.previousElementSibling.play()">&#x21BA; Replay</button>'
+         + '</div>'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  out += '</div>';
+  return out;
+}
+
 function renderSlide(i){
   stopAudio();
   currentSlide = i;
@@ -536,6 +574,7 @@ function renderSlide(i){
       <div class="slide-title">${s.title}</div>
     </div>
     <div class="slide-content">${s.contentHTML}</div>
+    ${renderMediaHTML(s)}
     <div class="narration-box">
       <div class="narration-header">
         <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span></div>

@@ -118,6 +118,48 @@ TIMER_NEW = (
     "window.addEventListener('DOMContentLoaded', init);"
 )
 
+MEDIA_CSS_LINES = (
+    '.slide-media{padding:0 40px 24px;display:flex;flex-direction:column;gap:18px}\n'
+    '.slide-figure{margin:0;display:flex;flex-direction:column;gap:8px}\n'
+    '.slide-img{width:100%;max-height:480px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:#f7f9fb}\n'
+    '.slide-video-wrap{position:relative;width:100%;background:#000;border-radius:6px;overflow:hidden;border:1px solid var(--border)}\n'
+    '.slide-video{width:100%;display:block;max-height:480px}\n'
+    ".video-replay-btn{position:absolute;bottom:10px;right:10px;background:rgba(13,27,42,.75);color:#fff;border:none;padding:5px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s}\n"
+    '.video-replay-btn:hover{background:var(--accent);color:#000}\n'
+    '.slide-figure figcaption{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:0 8px}'
+)
+
+RENDER_MEDIA_FN = (
+    "function renderMediaHTML(s){\n"
+    "  if(!s.image && !s.video) return '';\n"
+    "  let out = '<div class=\"slide-media\">';\n"
+    "  if(s.image){\n"
+    "    const src = typeof s.image === 'string' ? s.image : s.image.src;\n"
+    "    const cap = (typeof s.image === 'object' && s.image.caption) ? s.image.caption : '';\n"
+    "    out += '<figure class=\"slide-figure\">'\n"
+    "         + '<img class=\"slide-img\" src=\"' + src + '\" alt=\"' + (cap||'') + '\" loading=\"lazy\">'\n"
+    "         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')\n"
+    "         + '</figure>';\n"
+    "  }\n"
+    "  if(s.video){\n"
+    "    const src = typeof s.video === 'string' ? s.video : s.video.src;\n"
+    "    const poster = (typeof s.video === 'object' && s.video.poster) ? ' poster=\"' + s.video.poster + '\"' : '';\n"
+    "    const cap = (typeof s.video === 'object' && s.video.caption) ? s.video.caption : '';\n"
+    "    out += '<figure class=\"slide-figure\">'\n"
+    "         + '<div class=\"slide-video-wrap\">'\n"
+    "         + '<video class=\"slide-video\" controls playsinline' + poster + '>'\n"
+    "         + '<source src=\"' + src + '\" type=\"video/mp4\">'\n"
+    "         + 'Your browser does not support video playback.</video>'\n"
+    "         + '<button class=\"video-replay-btn\" onclick=\"this.previousElementSibling.currentTime=0;this.previousElementSibling.play()\">&#x21BA; Replay</button>'\n"
+    "         + '</div>'\n"
+    "         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')\n"
+    "         + '</figure>';\n"
+    "  }\n"
+    "  out += '</div>';\n"
+    "  return out;\n"
+    "}\n"
+)
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def apply_fix(html, check_marker, old, new, label, log):
@@ -227,6 +269,26 @@ def main():
         TIMER_OLD,
         TIMER_NEW,
         'Active-time tracker IIFE', log)
+
+    html = apply_fix(html, 'slide-media{',
+        '.data-table td.bad{color:var(--danger);font-weight:700}',
+        '.data-table td.bad{color:var(--danger);font-weight:700}\n' + MEDIA_CSS_LINES,
+        'Media CSS (.slide-media, .slide-video-wrap, etc.)', log)
+
+    html = apply_fix(html, '.slide-media{padding:0 24px',
+        '  .slide-nav{padding:16px 24px}',
+        '  .slide-nav{padding:16px 24px}\n  .slide-media{padding:0 24px 20px}',
+        'Mobile media CSS', log)
+
+    html = apply_fix(html, 'function renderMediaHTML',
+        'function renderSlide(i){',
+        RENDER_MEDIA_FN + '\nfunction renderSlide(i){',
+        'renderMediaHTML() function', log)
+
+    html = apply_fix(html, 'renderMediaHTML(s)',
+        '    <div class="slide-content">${s.contentHTML}</div>\n    <div class="narration-box">',
+        '    <div class="slide-content">${s.contentHTML}</div>\n    ${renderMediaHTML(s)}\n    <div class="narration-box">',
+        'renderMediaHTML call in renderSlide', log)
 
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(html)
