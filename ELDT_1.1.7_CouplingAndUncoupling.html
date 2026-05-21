@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Module 7 · Coupling and Uncoupling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+.module-counter strong{color:var(--accent);font-weight:700}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
+.toc-reset:hover{color:var(--danger);background:var(--light)}
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding:12px 16px;margin:18px 0;background:#fffdf6;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <span><strong>UNIT 1.1.7</strong> Coupling and Uncoupling</span>
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 30 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 30 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="../index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+  <span class="module-counter" id="moduleCounter"></span>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <div class="welcome-eyebrow">Module 7 &middot; Unit 1.1.7</div>
+      <h1>Coupling and Uncoupling</h1>
+      <div class="welcome-unit">Precision procedures that protect you, your cargo, and your equipment</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul><li>Walk through all 16 steps of the coupling procedure for single trailers</li><li>Inspect and test fifth wheel and kingpin components to verify safe coupling</li><li>Walk through all 12 steps of the uncoupling procedure</li><li>Operate landing gear safely using correct technique and gear selection</li><li>Describe the coupling and uncoupling procedures for doubles with a converter dolly</li></ul>
+      </div>
+      <button class="btn-start" onclick="startCourse()">Start Module &rarr;</button>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz locked" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>Knowledge Check
+    </div>
+    <button class="toc-reset" onclick="resetThisModule()">Reset This Module</button>
+  </aside>
+</div>
+
+<script>
+const USE_MP3 = false;
+const AUDIO_BASE_PATH = './audio/';
+const NARRATION_RATE = 0.95;
+
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  },
+  saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
+  resetModule(slug){
+    const data = this._load();
+    delete data[slug];
+    this._save(data);
+    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
+  }
+};
+
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","folder":"module1","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","folder":"module2","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","folder":"module3","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","folder":"module4","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","folder":"module5","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"built"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","folder":"module6","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"built"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","folder":"module7","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"built"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","folder":"module8","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","folder":"module9","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","folder":"module10","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","folder":"module11","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","folder":"module12","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","folder":"module13","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","folder":"module14","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","folder":"module15","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control/Recovery, Jackknifing, and Other Emergencies","folder":"module16","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","folder":"module17","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","folder":"module18","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","folder":"module19","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","folder":"module20","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","folder":"module21","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","folder":"module22","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","folder":"module23","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","folder":"module24","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","folder":"module25","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":26,"slug":"external-communications","unit":"1.5.6","title":"External Communications","folder":"module26","file":"ELDT_1.5.6_ExternalCommunications.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":27,"slug":"whistleblower-coercion","unit":"1.5.7","title":"Whistleblower/Coercion","folder":"module27","file":"ELDT_1.5.7_WhistleblowerCoercion.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":28,"slug":"trip-planning","unit":"1.5.8","title":"Trip Planning","folder":"module28","file":"ELDT_1.5.8_TripPlanning.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":29,"slug":"drugs-alcohol","unit":"1.5.9","title":"Drugs/Alcohol","folder":"module29","file":"ELDT_1.5.9_DrugsAlcohol.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":30,"slug":"medical-requirements","unit":"1.5.10","title":"Medical Requirements","folder":"module30","file":"ELDT_1.5.10_MedicalRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"}];
+const CURRENT_MODULE_SLUG = 'coupling-and-uncoupling';
+const slides = [{"section": "intro", "sectionLabel": "Introduction", "title": "Why Coupling and Uncoupling Requires Precision", "contentHTML": "<p>Coupling and uncoupling are among the most hazardous procedures in tractor-trailer operations.</p><p><strong>Errors can result in:</strong></p><ul><li>Dropped trailers</li><li>Torn air and electrical lines</li><li>Cab and trailer damage</li><li>Freight damage</li><li>Serious injury or death</li></ul><p>Following the correct step-by-step procedure every time is non-negotiable.</p>", "narration": "Coupling and uncoupling are procedures you'll perform regularly throughout your career — and they deserve full attention every single time. A dropped trailer isn't just inconvenient. It can tear air and electrical lines, damage the cab, destroy freight, and seriously injure anyone nearby. The procedures covered in this module exist for good reason: they protect you, your vehicle, your cargo, and everyone around you. Skip a step, and the consequences can be severe."}, {"section": "intro", "sectionLabel": "Introduction", "title": "Learning Objectives", "contentHTML": "<p>By the end of this module, you will be able to:</p><ul><li>Describe the proper procedures for coupling and uncoupling combination vehicles</li><li>Inspect and test coupling components to verify safe operation</li><li>Explain how to operate landing gear, pull releases, and position converter dollies</li></ul>", "narration": "This module walks you through everything you need to know about safely connecting and disconnecting a tractor from a trailer. You'll learn the full coupling and uncoupling sequences for single trailers, and the more complex procedures for doubles. You'll also understand how to inspect the fifth wheel and kingpin, operate the landing gear safely, and work with converter dollies when coupling twin trailers."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Steps 1 to 3: Inspect, Check Area, and Position", "contentHTML": "<p><strong>Step 1 — Inspect the Fifth Wheel and Kingpin:</strong></p><ul><li>Check for damaged, loose, or missing parts; confirm mounting is secure</li><li>Grease the fifth wheel plate if needed — dry fifth wheels cause steering problems in turns</li><li>Fifth wheel should be tilted down toward the rear, jaws open, release handle in unlocked position</li><li>If sliding fifth wheel: confirm locked with all pins seated</li><li>Check trailer kingpin — must not be loose, bent, or broken</li><li>Verify shipment identity and securement; confirm fifth wheel position won't let tractor strike landing gear</li></ul><p><strong>Step 2 — Check Area and Secure Trailer:</strong></p><ul><li>Ensure area is clear; check cargo for shift risk; chock trailer wheels or verify spring brakes applied; confirm trailer sliding axle is locked</li></ul><p><strong>Step 3 — Position the Tractor:</strong></p><ul><li>Align squarely and directly in front of trailer — never at an angle</li><li>Kingpin should align with the fifth wheel throat; back until just before the fifth wheel contacts the trailer apron</li><li>Use mirrors to confirm drive wheels are centered under the trailer</li></ul>", "narration": "Before you move the tractor anywhere near the trailer, you need to do a thorough inspection. The fifth wheel and kingpin connection is the heart of the coupling — if either component is damaged or out of position, the coupling won't hold. Grease the fifth wheel if it's dry; an improperly greased fifth wheel creates extra friction that leads to steering problems. The fifth wheel should be tilted back, jaws open, and the release handle in the unlocked position. If it's a sliding fifth wheel, make sure it's locked. Then check the trailer area — confirm everything is clear, the wheels are chocked, and the axle assembly is locked. When you're ready to move, align the tractor squarely in front of the trailer. Backing at an angle risks pushing the trailer sideways and breaking the landing gear."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Steps 4 to 6: Back In, Secure, and Check Height", "contentHTML": "<p><strong>Step 4 — Back Slowly into Position:</strong></p><ul><li>Back slowly toward the front of the trailer; stop when the fifth wheel just touches the trailer apron</li><li>If trailer appears too low to clear the tractor frame, stop and raise trailer height — never bump or force</li></ul><p><strong>Step 5 — Secure the Tractor:</strong></p><ul><li>Shift to neutral; apply parking brake before exiting</li></ul><p><strong>Step 6 — Check the Trailer Height:</strong></p><ul><li>Trailer should be low enough that it rises slightly when tractor backs under it</li><li>Too low: tractor may strike the trailer nose &nbsp;|&nbsp; Too high: trailer may miss the kingpin or hit the rear of the cab</li><li>Adjust by cranking landing gear or adjusting air suspension</li><li>Confirm kingpin is aligned with the fifth wheel throat</li><li><strong>Never go under a trailer that is not supported by a tractor or stable structure</strong></li></ul>", "narration": "Back slowly until the fifth wheel just touches the trailer apron. Don't drive forcefully into position — you should feel light contact, not a hard bump. Before you get out, shift to neutral and set the parking brake. Then go check the trailer height. The trailer should be positioned so the tractor raises it slightly when it backs underneath. If the trailer is too low, the tractor frame or nose of the trailer will make contact. If it's too high, the kingpin could miss the fifth wheel entirely and the trailer could fall onto the cab. Adjust using the landing gear crank or air suspension. And a serious safety note: never get under a trailer that isn't properly supported."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Steps 7 to 9: Air Lines, Air Supply, and Start Engine", "contentHTML": "<p><strong>Step 7 — Connect the Air Lines:</strong></p><ul><li>Two lines: <strong>service</strong> (blue or black) and <strong>emergency</strong> (red)</li><li>Driver's side trailer glad hand = emergency; passenger's side = service</li><li>Inspect all four glad hand seals for cracks or damage</li><li>Connect emergency line first; rotate glad hand 90 degrees to lock; then connect service line</li><li>Ensure enough slack so glad hands won't uncouple; support lines so they won't be crushed</li><li>Loose emergency line: trailer brakes lock up &nbsp;|&nbsp; Loose service line: serious air leak when brakes applied</li></ul><p><strong>Step 8 — Supply Air to the Trailer</strong> (pre-1975 trailers without spring brakes only):</p><ul><li>Push in air supply knob; wait for normal pressure; listen for air leaks; apply and release trailer brakes to confirm operation</li></ul><p><strong>Step 9 — Start the Engine and Set Trailer Brakes:</strong></p><ul><li>Verify air pressure is normal, then start engine; apply trailer brakes by pulling out air supply knob</li></ul>", "narration": "Before you make the main connection, hook up the air lines. There are two: the service line, usually blue or black, and the emergency line, usually red. On the trailer, the driver's side glad hand is the emergency connection, and the passenger side is the service connection. Inspect all four rubber seals before connecting — a cracked or damaged grommet means an air leak. Connect the emergency line first, rotating the glad hand 90 degrees to lock it. Then the service line. Make sure there's enough slack to avoid the glad hands uncoupling during movement. A loose emergency line causes the trailer brakes to lock. A loose service line causes a major air leak when you apply the brakes. If the trailer is a pre-1975 model without spring brakes, supply air to set the brakes before backing under."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Steps 10 to 12: Connect, Tug Test, Secure", "contentHTML": "<p><strong>Step 10 — Back Under the Trailer:</strong></p><ul><li>Use lowest reverse gear; release tractor parking brake; back slowly</li><li>The trailer apron should contact the fifth wheel and visibly lift the trailer</li><li>Stop when you hear and feel the fifth wheel jaws close around the kingpin</li><li><strong>Hitting the kingpin too hard can damage the kingpin, fifth wheel, landing gear, and cargo</strong></li></ul><p><strong>Step 11 — Tug Test:</strong></p><ul><li>With trailer brakes still locked, put tractor in low gear; gently pull forward — stop when you feel resistance</li><li>Repeat two more times: once with wheel turned left, once with wheel turned right</li></ul><p><strong>Step 12 — Secure the Vehicle:</strong></p><ul><li>Transmission to neutral; apply tractor parking brakes; shut off engine; take keys before going under the trailer</li></ul>", "narration": "Now you're ready to make the main connection. Use the lowest reverse gear and back slowly until you feel and hear the fifth wheel jaws snap around the kingpin. You should see the trailer rise slightly as the fifth wheel goes under the apron. If it doesn't lift, stop immediately, set the brakes, and go check the trailer height again. Don't drive into the kingpin hard — too much force damages components. Once connected, perform the tug test. With the trailer brakes locked, put the tractor in low gear and gently pull forward. Stop when you feel the trailer holding. Repeat with the wheel turned left and then right. This confirms the connection holds even at angles. Then secure the vehicle — neutral, parking brake on, engine off, keys in your pocket — before you go under the trailer."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Step 13: Inspect the Coupling", "contentHTML": "<p>The coupling inspection requires going under the trailer with a flashlight:</p><ul><li>Verify there is <strong>NO space</strong> between the fifth wheel plate and the trailer apron — full contact is required</li><li>Any gap means something is wrong — do not move the vehicle until you find and fix the problem</li><li>Look into the fifth wheel throat: jaws must be closed and locked around the <strong>shank</strong> of the kingpin — not the head</li><li>Check that the release arm is in the locked position</li><li>Check that the safety latch is over the release arm (some must be placed by hand)</li><li><strong>If the coupling is not correct in any way — do not move the vehicle</strong></li></ul>", "narration": "The coupling inspection is not optional. You need a flashlight, and you need to get under the trailer. First, check that the fifth wheel plate and trailer apron are in full contact — no gaps anywhere. If you see a gap, stop and find out why. With the flashlight, look into the throat of the fifth wheel and confirm the jaws are closed around the shank of the kingpin — not the head. Verify the release arm is in the locked position, and if your fifth wheel has a safety latch, make sure it's properly over the release arm. Some latches must be placed by hand. If anything about the coupling doesn't look right, do not move that vehicle."}, {"section": "coupling", "sectionLabel": "Coupling", "title": "Steps 14 to 16: Electrical, Landing Gear, Remove Chocks", "contentHTML": "<p><strong>Step 14 — Connect Electrical Cord and Check Air Lines:</strong></p><ul><li>Plug in electrical cord and fasten safety latch</li><li>Set tractor brakes, release trailer brakes, and listen for air leaks; ensure lines won't snag moving parts</li></ul><p><strong>Step 15 — Raise the Landing Gear:</strong></p><ul><li>Inspect landing gear for cracks and alignment before cranking</li><li>Low gear: stand facing forward or rear, feet shoulder-width apart, use both hands; crank until tractor bears trailer weight</li><li>High gear: face trailer, one hand on trailer for stability; crank fully up — do not spin crank quickly</li><li>Check clearance between rear of tractor frame and landing gear; check clearance between top of tractor tires and trailer nose</li><li><strong>Never drive with landing gear only partially raised — it can catch on railroad tracks</strong></li></ul><p><strong>Step 16 — Remove Chocks</strong></p>", "narration": "Plug in the electrical cord and fasten the safety latch. Set the tractor brakes, release the trailer brakes, and listen carefully for any air leaks. Now raise the landing gear. Always inspect the landing gear first. Put the crank in low gear before you start. Stand with feet apart and use both hands — this protects you from the crank handle kicking back. Common injuries include broken teeth, broken noses, and torn ligaments from improper technique. Once the tractor is carrying the weight, switch to high gear and crank it all the way up. Never leave the landing gear partially raised — it can catch on railroad tracks. Check clearances around the tractor frame and tires. Then pull the wheel chocks and store them."}, {"section": "uncoupling", "sectionLabel": "Uncoupling", "title": "Uncoupling Steps 1 to 6", "contentHTML": "<p><strong>Step 1 — Position the Rig:</strong></p><ul><li>Level surface; avoid dirt, sand, gravel, and hot blacktop; align tractor straight with trailer</li></ul><p><strong>Step 2 — Secure the Trailer:</strong></p><ul><li>Pull out trailer air supply button to lock trailer brakes; gently back up to ease pressure off fifth wheel jaws; apply tractor parking brakes; transmission to neutral; turn off engine</li></ul><p><strong>Step 3 — Chock the Trailer Wheels</strong></p><p><strong>Step 4 — Lower the Landing Gear:</strong></p><ul><li>Inspect for damage; lower until both supports make firm contact; for loaded trailers, crank a few extra turns in low gear to take some weight off the tractor; always leave in low gear when done</li></ul><p><strong>Step 5 — Disconnect Air Lines and Electrical Cord:</strong></p><ul><li>Connect glad hands to dummy couplers; hang electrical cord with plug facing down</li></ul><p><strong>Step 6 — Unlock the Fifth Wheel:</strong></p><ul><li>Bend at knees, use release hook if needed, keep feet clear of rear tractor wheels, pull straight out; if it won't release, ease pressure by backing gently and try again</li></ul>", "narration": "Uncoupling has 12 steps. Start by choosing the right spot — level ground, capable of supporting the trailer's weight. Chock the second trailer's wheels if needed. Align the tractor straight — an angled departure damages the landing gear. Lock the trailer brakes by pulling the air supply button. Then gently back up just a bit to take pressure off the fifth wheel jaws. Apply the tractor parking brake, put it in neutral, and shut down. Get out and chock the wheels. Lower the landing gear slowly — inspect it first. For a loaded trailer, crank a few extra turns in low gear to transfer some weight off the tractor. Always leave the crank in low gear. Disconnect the air lines — mate the glad hands to the dummy couplers. Hang the electrical cord with the plug facing down. Now pull the fifth wheel release — bend at the knees, keep your feet away from the tractor wheels, and pull straight out. If it won't move, ease pressure by backing slightly, set the brake, and try again."}, {"section": "uncoupling", "sectionLabel": "Uncoupling", "title": "Uncoupling Steps 7 to 12", "contentHTML": "<p><strong>Step 7 — Lower Air Suspension</strong> (if equipped):</p><ul><li>Drive forward one foot; move switch to dump; wait for air bags to fully deflate before pulling clear</li></ul><p><strong>Step 8 — Pull Tractor Partially Clear:</strong></p><ul><li>Pull forward until fifth wheel just begins to clear the trailer apron</li><li><strong>Stop with tractor frame still under the trailer</strong> — prevents trailer from crashing if landing gear fails</li></ul><p><strong>Step 9 — Secure the Tractor</strong></p><p><strong>Step 10 — Inspect Trailer Supports:</strong></p><ul><li>Verify ground is supporting the trailer; confirm landing gear is not sinking or damaged</li></ul><p><strong>Step 11 — Pull the Tractor Clear:</strong></p><ul><li>Confirm area is clear; slowly drive tractor out from under the trailer</li></ul><p><strong>Step 12 — Raise Air Suspension</strong> (if equipped)</p>", "narration": "If your tractor has air ride suspension, drive one foot forward and flip the dump switch. Let the air bags fully drain — don't pull clear until they're deflated, or the rear of the tractor will lurch up when you pull out. Then pull forward just enough to clear the apron plate — but stop while the tractor frame is still under the trailer. That frame is a safety net: if the landing gear shifts or sinks, the trailer rests on the frame instead of falling. Get out, check that the landing gear is properly supporting the weight, and look for any sinking. Once you're confident the trailer is stable, get back in, check the area, and slowly drive the tractor clear. Reinflate the air bags once you're clear."}, {"section": "doubles", "sectionLabel": "Coupling Doubles", "title": "Coupling and Uncoupling Doubles", "contentHTML": "<p><strong>Key rule: The most heavily loaded trailer must always go in the first position behind the tractor.</strong></p><p><strong>Coupling Doubles:</strong></p><ol><li>Secure rear trailer: if no spring brakes, use emergency air procedure; chock wheels</li><li>Couple tractor to first trailer using the complete 16-step procedure</li><li>Position converter dolly in front of rear trailer; set dolly parking brake</li><li>Connect dolly to first trailer; lock pintle hook; connect safety chains; connect air and electrical lines</li><li>Back dolly under rear trailer; verify height so trailer rises when dolly goes under; tug test; visual inspection; connect all lines; raise rear trailer landing gear; charge system</li></ol><p><strong>Uncoupling Doubles (rear trailer first):</strong></p><ol><li>Park on level ground; lower rear trailer landing gear; close air shut-offs; disconnect dolly to rear trailer lines; release dolly fifth wheel latch; pull tractor, first trailer, and dolly forward, clear of rear trailer</li><li><strong>Never unlock the pintle hook with the dolly still under the rear trailer — the tow bar can fly up and cause serious injury</strong></li><li>Position dolly; lower dolly landing gear; disconnect chains and lines; apply dolly brakes; release pintle hook; pull clear</li></ol>", "narration": "Coupling doubles is more complex than coupling a single trailer, but the principles are the same. The most critical rule: your heavier trailer always goes first, directly behind the tractor. The lighter one goes to the rear. Start by securing the rear trailer. Then couple the tractor to the first trailer using the complete 16-step process. Position the converter dolly in front of the rear trailer, connect it at both ends, and verify the rear trailer rises slightly when the dolly backs under. Tug test the rear trailer, do a visual inspection, connect all air and electrical lines, raise the landing gear, and charge the system. Uncoupling doubles goes in reverse order — rear trailer first, then the dolly. A critical warning: never unlock the pintle hook while the dolly is still under the rear trailer. The tow bar can fly upward under tension and cause serious injury."}, {"section": "wrapup", "sectionLabel": "Wrap-Up", "title": "What You've Covered", "contentHTML": "<p>You should now be able to:</p><ul class=\"check-list\"><li>Explain why coupling and uncoupling require strict procedure every time</li><li>Walk through all 16 steps of the coupling procedure for single trailers</li><li>Describe the fifth wheel and kingpin inspection requirements</li><li>Walk through all 12 steps of the uncoupling procedure</li><li>Apply landing gear operation and safety rules correctly</li><li>Describe the process for coupling and uncoupling doubles with a converter dolly</li></ul><p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 8.</p>", "narration": "That wraps up Module 7. You now understand why coupling and uncoupling procedures must be followed exactly every time, how to perform the full 16-step coupling procedure including the inspection under the trailer, the complete 12-step uncoupling process, how to operate the landing gear safely, and the special procedures required for coupling and uncoupling doubles with a converter dolly. Up next is the Knowledge Check. Score 80 percent or higher to pass and unlock Module 8."}];
+const quizData = [{"q": "What position should the fifth wheel be in before coupling?", "opts": ["Tilted up toward the front of the tractor, jaws closed", "Tilted down toward the rear of the tractor, jaws open, release handle in unlocked position", "Fully raised and locked with jaws in a neutral position", "Adjusted to high position with locking pins removed"], "ans": 1, "exp": "Before coupling, the fifth wheel should be tilted down toward the rear of the tractor, jaws open, and the release handle in the unlocked position. This allows the kingpin to enter the fifth wheel correctly."}, {"q": "What is the 'tug test' in the coupling procedure?", "opts": ["Pulling the fifth wheel release handle to verify it is locked", "Checking the glad hand connections by tugging on the air lines", "With trailer brakes locked, gently pulling the tractor forward to confirm the trailer is secured", "Inspecting the kingpin by manually attempting to move it"], "ans": 2, "exp": "The tug test is performed after backing under the trailer. With the trailer brakes locked, the driver puts the tractor in low gear and gently pulls forward, stopping when resistance is felt. This is repeated with the wheel turned left and right."}, {"q": "When inspecting the coupling under the trailer, what must you confirm about the fifth wheel jaws?", "opts": ["The jaws are open and ready for the next coupling", "The jaws are closed and locked around the shank of the kingpin, not the head", "The jaws are positioned around the head of the kingpin for maximum hold", "The jaws are partially engaged but will fully close during driving"], "ans": 1, "exp": "After coupling, the inspection requires confirming that the fifth wheel jaws are closed and locked around the shank of the kingpin — not the head. A gap between the apron and the fifth wheel plate also indicates a problem."}, {"q": "Why is it dangerous to hit the kingpin too hard when backing under the trailer?", "opts": ["It causes the clutch to disengage", "It can damage the kingpin, fifth wheel, landing gear, and cargo", "It automatically opens the fifth wheel jaws", "It triggers the trailer's emergency brake system"], "ans": 1, "exp": "Excessive force when backing under the trailer can cause significant damage to the kingpin, fifth wheel, landing gear, and the cargo inside the trailer. Back slowly and stop when you hear and feel the jaws engage."}, {"q": "Which air line connects to the emergency glad hand on the trailer?", "opts": ["The blue service line", "The black service line", "The red emergency line", "The yellow auxiliary line"], "ans": 2, "exp": "The red emergency line connects to the emergency glad hand. When disconnected or damaged, the emergency line causes the trailer brakes to lock — a safety feature designed to prevent a runaway trailer."}, {"q": "What should you do if the fifth wheel release handle will not pull?", "opts": ["Force the handle using a pry bar", "Ease pressure on the fifth wheel jaws by backing gently until pushing against the kingpin, then set tractor brake and try again", "Remove the kingpin from the trailer", "Disconnect the air lines and try again"], "ans": 1, "exp": "If the release handle won't pull, ease the pressure on the jaws by backing the tractor gently until it pushes against the kingpin, then set the tractor brake while in that position. This relieves pressure on the locking jaws."}, {"q": "Why should you leave the landing gear in low gear after lowering it during uncoupling?", "opts": ["To prevent the landing gear from auto-retracting", "So the next driver can generate enough torque to begin cranking on a loaded trailer", "To reduce trailer nose height for proper kingpin alignment on recoupling", "FMCSA regulations require low gear storage"], "ans": 1, "exp": "Always leave the landing gear in low gear when done. If left in high gear and the trailer is loaded, the next driver may not be able to get enough torque to begin cranking."}, {"q": "What is the correct trailer height for coupling?", "opts": ["Level with the fifth wheel plate, top to top", "Slightly lower than the fifth wheel center, so the trailer is raised slightly when the tractor backs under it", "Higher than the fifth wheel to allow easy kingpin entry", "At the same height as the rear of the tractor cab"], "ans": 1, "exp": "The trailer should be positioned slightly lower than the center of the fifth wheel. This causes the trailer to be raised slightly as the tractor backs under it — ensuring correct kingpin entry and confirming engagement."}, {"q": "What is the primary reason for never driving with landing gear only partially raised?", "opts": ["It creates steering instability", "It causes air pressure to leak from the trailer air tank", "The landing gear can catch on railroad tracks or other road obstacles", "It interferes with the fifth wheel locking mechanism"], "ans": 2, "exp": "Driving with the landing gear only partially raised risks catching it on railroad tracks, raised road edges, or other obstructions. The landing gear must always be fully raised before moving the vehicle."}, {"q": "During uncoupling, why should you keep the tractor frame under the trailer when pulling partially clear?", "opts": ["To allow slack in the air lines before full disconnection", "To perform the tug test from a partial position", "If the landing gear collapses or sinks, the tractor frame prevents the trailer from crashing to the ground", "So the trailer will have enough clearance for the landing gear to lower"], "ans": 2, "exp": "Keeping the tractor frame under the trailer during the partial-clear step is a safety measure. If the landing gear fails or sinks unexpectedly, the trailer will rest on the tractor frame instead of dropping to the ground."}, {"q": "For coupling doubles, which trailer must always go in the first position directly behind the tractor?", "opts": ["The lighter trailer", "The trailer with the most axles", "The most heavily loaded trailer", "The trailer that was coupled most recently"], "ans": 2, "exp": "When coupling twin trailers, the most heavily loaded trailer must always be in the first position, directly behind the tractor. The lighter trailer goes to the rear. This configuration provides better stability and braking performance."}, {"q": "When coupling a converter dolly to a rear trailer, what must you verify about the trailer height?", "opts": ["The trailer must be level with the dolly fifth wheel", "The trailer must be higher than the dolly fifth wheel so the dolly can slide under without lifting", "The trailer must be slightly lower than the center of the dolly fifth wheel so it rises slightly when the dolly goes under", "The trailer must be at maximum landing gear height"], "ans": 2, "exp": "Just like coupling a single trailer, the rear trailer must be positioned slightly lower than the center of the dolly's fifth wheel. This causes the trailer to lift slightly when the dolly backs under it, confirming a good connection."}, {"q": "Why should you never unlock the pintle hook with the converter dolly still under the rear trailer?", "opts": ["The pintle hook is a load-bearing component that cannot be released under load", "The dolly tow bar is under tension and can fly upward when released, potentially causing injury", "Releasing the pintle hook under the trailer can damage the dolly fifth wheel", "FMCSA requires the dolly to be fully clear before the pintle hook is released"], "ans": 1, "exp": "When the dolly is under the rear trailer, the tow bar is under significant tension. Releasing the pintle hook in this position can cause the tow bar to spring upward with force, creating a serious risk of injury. Always pull the dolly clear of the rear trailer first."}, {"q": "After raising the landing gear during coupling, what two clearances must you verify?", "opts": ["Clearance between trailer doors and the dock", "Clearance between the rear tractor frame and landing gear, and between the top of tractor tires and the trailer nose", "Clearance between the fifth wheel and the trailer apron", "Clearance between the kingpin and the fifth wheel jaws"], "ans": 1, "exp": "After raising the landing gear, two clearances must be confirmed: there must be enough space between the rear of the tractor frame and the landing gear (to allow sharp turns), and between the top of the tractor tires and the underside of the trailer nose."}, {"q": "If a gap is found between the trailer apron and the fifth wheel plate during the coupling inspection, what should you do?", "opts": ["Drive a short distance to allow the connection to fully seat", "Tighten the fifth wheel adjustment bolts from under the trailer", "Stop — do not move the vehicle until the problem is identified and corrected", "Apply extra tension using the fifth wheel release handle"], "ans": 2, "exp": "Any gap between the trailer apron and the fifth wheel plate indicates a problem with the coupling. The vehicle must not be moved until the issue is found and corrected."}];
+
+const ICON_PLAY  = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE  = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+let currentSlide = 0;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+let audioTimerInterval = null;
+let estimatedDuration = 0;
+let audioElapsed = 0;
+let audioPlayStart = 0;
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;
+let currentUtterance = null;
+
+function saveCurrentState(){
+  Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
+function resetThisModule(){
+  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
+    Progress.resetModule(CURRENT_MODULE_SLUG);
+    window.location.reload();
+  }
+}
+
+(function(){
+  let _start = Date.now(), _accum = 0;
+  function _flush(){
+    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
+    _accum = 0; _start = Date.now();
+    if(secs < 1) return;
+    const data = Progress._load();
+    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
+    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
+    Progress._save(data);
+  }
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden'){ _flush(); } else { _start = Date.now(); } });
+  window.addEventListener('beforeunload', _flush);
+  setInterval(_flush, 30000);
+})();
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  const _saved = Progress.loadState(CURRENT_MODULE_SLUG);
+  if(_saved){
+    unlockStatus = (_saved.unlockStatus && _saved.unlockStatus.length === slides.length) ? _saved.unlockStatus : new Array(slides.length).fill(false);
+    if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
+    else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
+  }
+  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 30'; }
+  buildDropdown();
+  buildTOC();
+  updateTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){ link.style.pointerEvents = 'none'; link.href = 'javascript:void(0)'; }
+    else if(isCompleted || isUnlocked){ link.href = '../' + m.folder + '/' + m.file; }
+    else { link.href = 'javascript:void(0)'; link.addEventListener('click', e => { e.preventDefault(); }); }
+    link.innerHTML = '<div class="dropdown-item-status"></div><div class="di-text"><div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div><div class="di-title">' + m.title + '</div></div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 30 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => { if(!wrap.contains(e.target)){ wrap.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ wrap.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); } });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){ viewMode = 'slide'; renderSlide(0); }
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  saveCurrentState();
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    <div class="narration-box">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">&#x1F50A;</span><span>Narration</span></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-text">${s.narration}</div>
+      <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">&#8592; Previous</button>
+      <div class="lock-msg" id="lockMsg">&#x1F512; Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check &#8594;' : 'Next &#8594;'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0);
+  }
+}
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  if(USE_MP3){
+    const file = AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration) currentAudio.currentTime = fromElapsedSeconds;
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => { isPlaying = true; audioPlayStart = Date.now(); setAudioControlPlaying(); startProgressTimer(); }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){ onAudioComplete(false); return; }
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    textToSpeak = text.split(/\s+/).slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){ onAudioComplete(false); }
+}
+
+function togglePlayPause(){ if(isComplete) return; if(isPlaying){ pauseAudio(); } else { resumeAudio(); } }
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  if(audioPlayStart > 0){ audioElapsed += (Date.now() - audioPlayStart) / 1000; audioPlayStart = 0; }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){ currentAudio.pause(); }
+  else if(window.speechSynthesis){
+    if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => { isPlaying = true; audioPlayStart = Date.now(); setAudioControlPlaying(); startProgressTimer(); }).catch(() => { playTTS(currentNarrationText, audioElapsed); });
+  } else { playTTS(currentNarrationText, audioElapsed); }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){ return Math.max(8, (text.split(/\s+/).length / 155) * 60); }
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying) return;
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]) onAudioComplete(false);
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true; isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){ unlockStatus[currentSlide] = true; saveCurrentState(); }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '&#10003; Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false; audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1) renderSlide(currentSlide + 1);
+  else startQuiz();
+}
+function prevSlide(){ if(currentSlide > 0) renderSlide(currentSlide - 1); }
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '&#10003; Correct' : '&#10007; Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results &#8594;' : 'Next Question &#8594;') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else showResults();
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){ Progress.markComplete(CURRENT_MODULE_SLUG, pct); buildDropdown(); }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You’ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You’ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you’ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' &#8594;</a>'
+              : '<a class="btn btn-next" href="../index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    document.getElementById('slidePanel').innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '&#10003; You answered correctly' : '&#10007; You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">&#8592; Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next &#8594;'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>

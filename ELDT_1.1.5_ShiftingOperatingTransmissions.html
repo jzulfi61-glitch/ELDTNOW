@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Module 5 · Shifting / Operating Transmissions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+.module-counter strong{color:var(--accent);font-weight:700}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
+.toc-reset:hover{color:var(--danger);background:var(--light)}
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding:12px 16px;margin:18px 0;background:#fffdf6;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <span><strong>UNIT 1.1.5</strong> Shifting / Operating Transmissions</span>
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 30 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 30 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="../index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+  <span class="module-counter" id="moduleCounter"></span>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <div class="welcome-eyebrow">Module 5 &middot; Unit 1.1.5</div>
+      <h1>Shifting / Operating Transmissions</h1>
+      <div class="welcome-unit">Mastering the manual transmission — the professional standard</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul><li>Identify the three controls and three instruments used in every shift</li><li>Perform the steps for upshifting and downshifting a manual transmission</li><li>Describe the technique for hitting or hunting a gear while rolling</li><li>List the traits of a skilled, professional shifter</li><li>Recognize the shift patterns for four common manual transmissions</li><li>Distinguish between semiautomatic, autoshift, and automatic transmissions</li></ul>
+      </div>
+      <button class="btn-start" onclick="startCourse()">Start Module &rarr;</button>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz locked" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>Knowledge Check
+    </div>
+    <button class="toc-reset" onclick="resetThisModule()">Reset This Module</button>
+  </aside>
+</div>
+
+<script>
+const USE_MP3 = false;
+const AUDIO_BASE_PATH = './audio/';
+const NARRATION_RATE = 0.95;
+
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  },
+  saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
+  resetModule(slug){
+    const data = this._load();
+    delete data[slug];
+    this._save(data);
+    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
+  }
+};
+
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","folder":"module1","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","folder":"module2","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","folder":"module3","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","folder":"module4","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","folder":"module5","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"built"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","folder":"module6","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"built"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","folder":"module7","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"built"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","folder":"module8","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","folder":"module9","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","folder":"module10","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","folder":"module11","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","folder":"module12","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","folder":"module13","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","folder":"module14","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"pending"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","folder":"module15","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control/Recovery, Jackknifing, and Other Emergencies","folder":"module16","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","folder":"module17","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"pending"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","folder":"module18","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","folder":"module19","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","folder":"module20","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting Malfunctions","status":"pending"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","folder":"module21","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","folder":"module22","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","folder":"module23","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","folder":"module24","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","folder":"module25","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":26,"slug":"external-communications","unit":"1.5.6","title":"External Communications","folder":"module26","file":"ELDT_1.5.6_ExternalCommunications.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":27,"slug":"whistleblower-coercion","unit":"1.5.7","title":"Whistleblower/Coercion","folder":"module27","file":"ELDT_1.5.7_WhistleblowerCoercion.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":28,"slug":"trip-planning","unit":"1.5.8","title":"Trip Planning","folder":"module28","file":"ELDT_1.5.8_TripPlanning.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":29,"slug":"drugs-alcohol","unit":"1.5.9","title":"Drugs/Alcohol","folder":"module29","file":"ELDT_1.5.9_DrugsAlcohol.html","group":"A1.5 — Non-Driving Activities","status":"pending"},{"num":30,"slug":"medical-requirements","unit":"1.5.10","title":"Medical Requirements","folder":"module30","file":"ELDT_1.5.10_MedicalRequirements.html","group":"A1.5 — Non-Driving Activities","status":"pending"}];
+const CURRENT_MODULE_SLUG = 'shifting-operating-transmissions';
+const slides = [{"section": "intro", "sectionLabel": "Introduction", "title": "Shifting: The Skill That Sets Professionals Apart", "contentHTML": "<p>Mastering the transmission is one of the most challenging and important skills you'll develop as a CDL driver.</p><ul><li>Shifting requires coordination, timing, and practice</li><li>Proper technique protects the vehicle and improves fuel economy</li><li>This module covers manual, semiautomatic, autoshift, and automatic transmissions</li></ul>", "narration": "Shifting is one of those skills that separates a good driver from a great one. It takes real coordination, solid timing, and a lot of practice. Done right, you'll protect the truck's drivetrain, save fuel, and keep your vehicle under control in any situation. We'll cover everything from manual transmissions to automatics by the end of this module."}, {"section": "intro", "sectionLabel": "Introduction", "title": "Learning Objectives", "contentHTML": "<p>By the end of this module, you will be able to:</p><ul><li>Describe the key controls and tools for shifting a manual transmission</li><li>Identify basic shift patterns and procedures</li><li>Explain how proper shifting improves vehicle control and fuel economy</li><li>Recognize the characteristics of automatic, semiautomatic, and autoshift transmissions</li></ul>", "narration": "Here's what we're going to cover. By the time you finish this module, you'll understand the controls and instruments you use to shift, how to upshift and downshift correctly, what makes a skilled shifter, and how different transmission types work — including the ones that do some of the work for you."}, {"section": "controls", "sectionLabel": "Controls & Tools", "title": "Three Controls That Drive the Shift", "contentHTML": "<p>Manual transmissions rely on three controls working in sync:</p><ul><li><strong>Accelerator</strong> — controls fuel flow to the engine, determining RPMs in any gear</li><li><strong>Shift lever</strong> — selects the gear; low gears give power with little road speed; high gears give speed with less power</li><li><strong>Clutch</strong> — connects or disconnects the engine from the transmission; when depressed, the drivetrain disengages and gears can be changed; when fully released, gears generally cannot be safely shifted</li></ul>", "narration": "Three controls work together every time you shift. The accelerator manages how fast the engine is spinning — the RPMs. The shift lever chooses which gear you're in. Low gears give you a lot of pulling power but slow speed, while high gears let you go faster with less power. And the clutch is the bridge between the engine and the transmission. Depress it and the drivetrain disconnects — that's when you can move the shift lever. Improper timing here leads to gear grinding and can damage components, so coordination matters."}, {"section": "controls", "sectionLabel": "Controls & Tools", "title": "Your Shifting Gauges and Governor", "contentHTML": "<p>Three instruments guide every shift:</p><ul><li><strong>Speedometer</strong> — shows road speed in mph; each gear has a speed range; reach the max, upshift; reach the min, downshift</li><li><strong>Tachometer</strong> — shows engine speed in hundreds of RPMs; reach max, upshift; drop to minimum, downshift</li><li><strong>Governor</strong> — limits maximum RPMs electronically or mechanically; when governed RPMs are reached, you must shift up to go faster; it also limits how high you can rev when downshifting</li></ul>", "narration": "Three instruments tell you when and how to shift. The speedometer tracks your road speed — each gear has a speed range it operates in. The tachometer shows your engine RPMs, and you'll use it constantly to time your shifts correctly. Then there's the governor — it's there to protect the engine by capping your maximum RPMs. Once you hit that limit going up through the gears, the only way to go faster is to shift to a higher gear. It also limits how high you can rev when downshifting."}, {"section": "controls", "sectionLabel": "Controls & Tools", "title": "Most Tractor-Trailers Have 7 to 18 Gears", "contentHTML": "<ul><li>Most tractor-trailers have anywhere from 7 to 18 gears</li><li>Each gear delivers the right amount of engine power to the wheels at a specific speed</li><li>Generally, shifting occurs when the engine reaches approximately 1,200 to 1,800 RPMs</li><li>Exact RPM range varies by gear and engine type</li><li>Consult the vehicle's owner's manual for specific shift points</li></ul>", "narration": "Most big trucks have somewhere between 7 and 18 gears — quite a range. Each gear is designed to deliver the right amount of power to the wheels at a specific speed. As a general rule, you'll shift when the engine hits somewhere around 1,200 to 1,800 RPMs, but that varies depending on the gear and the specific engine you're running. Always check the vehicle manual for the exact shift points for the truck you're driving."}, {"section": "technique", "sectionLabel": "Shifting Technique", "title": "Upshifting: Building Speed", "contentHTML": "<p>Upshifting allows the vehicle to increase speed. Steps:</p><ol><li>Release the accelerator, depress the clutch just enough to disengage it, and shift to neutral — all at the same time</li><li>Release the clutch</li><li>Allow engine RPMs to drop the correct amount (typically 400 to 500 RPMs) for the next gear</li><li>Depress the clutch again and shift to the next higher gear — simultaneously</li><li>Release the clutch and press the accelerator</li></ol>", "narration": "Upshifting is how you build speed. Start by releasing the throttle and depressing the clutch — about halfway down — while moving the shifter to neutral. All three happen together. Then let the clutch back up, let the RPMs drop the right amount — usually 400 to 500 — then depress the clutch again and move to the next gear. Release the clutch and get back on the throttle. That's double-clutching, and when it's done right, the gears slip in without grinding."}, {"section": "technique", "sectionLabel": "Shifting Technique", "title": "Downshifting: Engine Braking and Control", "contentHTML": "<p>Downshifting slows the vehicle and provides engine braking. Steps:</p><ol><li>Check the tachometer — determine target RPMs for the lower gear</li><li>Release the accelerator, depress the clutch, and shift to neutral — simultaneously</li><li>Release the clutch</li><li>Press the accelerator to raise engine RPMs to the target for the lower gear (typically 400 to 500 RPMs higher than current)</li><li>Depress the clutch and shift to the lower gear — simultaneously</li><li>Release the clutch and press the accelerator</li></ol><p><strong>Never downshift earlier than necessary</strong> — early downshifting can prevent you from completing the shift.</p>", "narration": "Downshifting does two things: it helps slow the vehicle using engine braking, and it gives you more power when the situation calls for it. The process is similar to upshifting, but reversed. Check your tachometer first. Release the throttle, depress the clutch, and go to neutral — all at once. Let the clutch up. Now blip the throttle to raise the RPMs up to where they need to be for the lower gear — typically 400 to 500 higher than where you were. Then clutch in and slide the shifter into the lower gear, and release. One key warning: don't downshift too early. If you do, the governor won't let the engine rev high enough to complete the shift."}, {"section": "technique", "sectionLabel": "Shifting Technique", "title": "Hitting or Hunting a Gear", "contentHTML": "<p>Used when the vehicle is already rolling and needs to be put into the correct gear:</p><ol><li>Determine the right gear based on current speed</li><li>Rev the engine to estimated RPMs for that gear, depress the clutch, and push the shift lever lightly against the target gear</li><li>Continue adjusting RPMs until the shifter slides in without excessive grinding</li></ol><p>If RPMs are too far off, you'll hear a high-pitched grind. When close but not exact, you'll feel slow, heavy vibrations in the shifter. When RPMs match, the lever falls into gear — push it fully in and release the clutch.</p>", "narration": "Sometimes you're already rolling and you need to get the truck into the right gear. Drivers call this hitting a gear or hunting a gear. The idea is to think about what gear makes sense for your current speed, rev the engine to where you think the RPMs should be, then lightly push the shifter against that gear while the clutch is in. If you're way off, you'll hear a sharp high-pitched grind. If you're close but not quite there, the vibrations in the shifter will be slow and heavy. When the RPMs line up correctly, the lever just falls in. Then push it fully in and get back on the throttle."}, {"section": "technique", "sectionLabel": "Shifting Technique", "title": "Traits of a Skilled Shifter", "contentHTML": "<p>Good shifting is a professional trademark. It includes:</p><ul><li>Good timing and coordination on every shift</li><li>Knowing what gear you're in at all times</li><li>Knowing the top and bottom mph and RPM for each gear</li><li>Making shifts without forcing, raking, or grinding gears</li><li>Never riding the clutch</li><li>Always using the clutch when shifting</li><li>Staying in the right gear for best fuel economy</li><li>Anticipating terrain and traffic changes before they happen</li><li>Never forcing the gear shift lever — shift using only your fingers, not your whole arm</li></ul>", "narration": "Great drivers are smooth shifters. That means always knowing what gear you're in, knowing when to shift based on your speed and RPMs, and never grinding or forcing a gear. Riding the clutch wears it out faster than almost anything else — don't do it. Use the clutch every time you shift. Choose the right gear for fuel economy — don't lug the engine or run it too high. And get in the habit of reading the road ahead so you're always in the right gear before you need it."}, {"section": "technique", "sectionLabel": "Shifting Technique", "title": "Why Smooth Shifting Matters", "contentHTML": "<p>Proper technique protects the drivetrain and improves fuel efficiency:</p><ul><li>Matched RPMs during gear changes create smooth transitions and prevent drive wheel lockup</li><li>Lurching or jerking means mismatched RPMs or slow clutch engagement</li><li>Unsmooth shifts on curves or slippery surfaces can cause loss of vehicle control</li><li>Downshifting too early causes the engine to over-rev and burns excess fuel</li><li>Running in too high a gear strains internal engine components</li></ul>", "narration": "Here's why technique matters beyond just comfort. When you match RPMs correctly during a shift, the gears transition smoothly. If the truck lurches or jerks, the RPMs weren't matched — and on a slick surface or in a curve, that can cause the drive wheels to lock up momentarily. Downshifting too early makes the engine scream and burns more fuel, and the governor may prevent the shift entirely. Being in too high a gear makes the engine bog down and stresses its internal components. Smooth shifting is about safety and efficiency, not just feel."}, {"section": "patterns", "sectionLabel": "Shift Patterns", "title": "Eaton Fuller Nine-Speed Pattern", "contentHTML": "<p>Low range: Low through 4th &nbsp;|&nbsp; High range: 5th through 8th</p><p><strong>Upshifting:</strong></p><ul><li>Range lever down (low range); double-clutch through 1st through 4th</li><li>Before 4th to 5th: lift range lever — range shifts automatically as shifter passes through neutral</li><li>Double-clutch 5th through 8th normally</li></ul><p><strong>Downshifting:</strong></p><ul><li>Double-clutch 8th through 5th, matching engine speed to road speed</li><li>Before 5th to 4th: push range lever down — it shifts to low range as you pass through neutral</li><li>Double-clutch 4th through 1st</li></ul>", "narration": "The Eaton Fuller Nine-Speed splits into two ranges. Low range covers Low through 4th gear, and high range covers 5th through 8th. When upshifting, you start in low range and double-clutch through 4th. To move to 5th, you lift the range lever before the shift, and as the lever passes through neutral, the transmission automatically moves to high range. You then double-clutch the rest of the way up. Downshifting is the reverse — double-clutch down from 8th to 5th, then push the range lever down before pulling from 5th to 4th, and continue down through 1st."}, {"section": "patterns", "sectionLabel": "Shift Patterns", "title": "Eaton Fuller Super Ten Pattern", "contentHTML": "<p>Five shift lever positions, each split — cuts lever movement in half.</p><p><strong>Splitter-only upshifts</strong> (1 to 2, 3 to 4, etc.): Move splitter forward, release throttle, let RPMs drop 400, wait for engagement.</p><p><strong>Shifter and splitter upshifts</strong> (2 to 3, 4 to 5, etc.): Move splitter back; release throttle, clutch in, shift to neutral; release clutch; wait 400 RPM drop; clutch in and shift — splitter moves automatically through neutral.</p><p><strong>Splitter-only downshifts:</strong> Move splitter back, release throttle, wait for disengagement, gently rev 400 RPMs.</p><p><strong>Shifter and splitter downshifts:</strong> Move splitter forward; release throttle, clutch in, neutral; release clutch; raise RPMs 400; clutch in and shift to lower gear.</p>", "narration": "The Eaton Fuller Super Ten has five shift lever positions, each split — so you're making two gear changes per lever position. For splitter-only upshifts, just move the splitter button forward, let off the throttle, let the RPMs drop 400, and the gear engages. When both the lever and splitter must move, push the splitter back first, then go through a full double-clutch maneuver — the splitter moves automatically as the lever passes through neutral. Downshifting works in reverse: splitter-only downshifts need you to move the splitter back, let off the throttle, and gently add 400 RPMs. When both must move, work through the full reverse sequence."}, {"section": "patterns", "sectionLabel": "Shift Patterns", "title": "Rockwell Ten-Speed Pattern", "contentHTML": "<p>Low range: 1st through 5th &nbsp;|&nbsp; High range: 6th through 10th (range control lever)</p><p><strong>Upshifting:</strong></p><ul><li>Range lever down (low range); double-clutch through 5th</li><li>Before 5th to 6th: lift range control lever — range shifts automatically as shifter passes through neutral</li><li>Double-clutch 6th through 10th</li></ul><p><strong>Downshifting:</strong></p><ul><li>Double-clutch 10th through 6th, matching engine speed</li><li>Before 6th to 5th: push range lever down</li><li>Double-clutch 5th through 1st, matching engine speed throughout</li></ul>", "narration": "The Rockwell Ten-Speed has two ranges: low covers 1st through 5th, and high covers 6th through 10th, controlled by a range lever. Upshifting starts in low range — double-clutch through 5th, then lift the range lever before moving to 6th. The range shifts automatically as the shifter passes through neutral. Continue double-clutching from 6th to 10th. Downshifting goes the other direction — match speed as you come down from 10th to 6th, push the range lever down before shifting from 6th to 5th, then double-clutch the rest of the way down through 1st."}, {"section": "othertrans", "sectionLabel": "Other Transmissions", "title": "Semiautomatic, Autoshift, and Automatic Transmissions", "contentHTML": "<p><strong>Semiautomatic:</strong> Has a clutch and shift lever like a manual, but the top gears shift automatically using electronic controls.</p><p><strong>Autoshift:</strong> Has a clutch and gear select lever or button. In <em>Drive</em>: shifts automatically by speed and load. In <em>Hold</em>: stays in current gear until you use the upshift or downshift button. Will not shift if the next gear isn't achievable at current RPMs or load.</p><p><strong>Automatic (torque converter):</strong> No clutch; uses a torque converter. Range positions include Neutral (starting and parking — never coast in neutral), Reverse (vehicle must be stopped first), Drive (normal driving, begins in 2nd, auto-upshifts), Lower range (engine braking), Low (steep grades, snow, mud), and Creeper (off-road traction only).</p>", "narration": "Not all trucks use a manual transmission. The semiautomatic looks like a manual — it has a clutch and shifter — but the upper gears change automatically using electronics. The autoshift transmission also has a clutch and a select lever. Put it in Drive and it shifts on its own based on speed and load. Put it in Hold and it stays put until you tell it otherwise — but it won't attempt a shift it can't complete safely. The automatic uses a torque converter instead of a clutch. Neutral is for starting and parking — never coast in neutral, it can damage the transmission. Reverse is only for stopped vehicles. Drive is your normal mode. Lower range gives you engine braking, low gear is for steep hills or slick conditions, and creeper gear is for off-road use only."}, {"section": "wrapup", "sectionLabel": "Wrap-Up", "title": "What You've Covered", "contentHTML": "<p>You should now be able to:</p><ul class=\"check-list\"><li>Identify the three controls and three instruments used for shifting</li><li>Perform the steps for upshifting and downshifting a manual transmission</li><li>Describe the technique for hitting or hunting a gear while rolling</li><li>List the traits of a skilled, professional shifter</li><li>Recognize the shift patterns for four common manual transmissions</li><li>Distinguish between semiautomatic, autoshift, and automatic transmissions</li></ul><p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 6.</p>", "narration": "That wraps up Module 5. You now understand the three controls and instruments that make every shift work. You know how to upshift and downshift using the double-clutch technique, how to hit a gear while rolling, what it means to be a skilled shifter, how four common transmission shift patterns work, and how semiautomatic, autoshift, and automatic transmissions differ from a standard manual. Up next is the Knowledge Check. Score 80 percent or higher to pass and unlock Module 6."}];
+const quizData = [{"q": "What is the primary purpose of upshifting?", "opts": ["To increase engine braking force", "To allow the vehicle to increase speed", "To reduce engine RPMs below idle", "To engage the governor"], "ans": 1, "exp": "Upshifting allows the vehicle to build more road speed. Higher gears provide less power but more speed once momentum is established."}, {"q": "When upshifting with a manual transmission, what happens after you shift to neutral and release the clutch?", "opts": ["You immediately shift to the next higher gear", "You press the accelerator hard to rev the engine", "You let the engine RPMs drop the correct amount (typically 400 to 500) before clutching in again", "You hold the clutch down until the RPMs stabilize"], "ans": 2, "exp": "After moving to neutral and releasing the clutch, you wait for the RPMs to drop the correct amount — about 400 to 500 in most cases — before depressing the clutch again and completing the upshift."}, {"q": "Why should you never downshift earlier than necessary?", "opts": ["It damages the speedometer", "The governor may prevent the engine from revving high enough to complete the shift", "The clutch will disengage automatically", "It causes the automatic transmission to stall"], "ans": 1, "exp": "Early downshifting can make it impossible to complete the shift because the governor limits how high the engine can rev, preventing you from reaching the RPMs needed for the lower gear."}, {"q": "What does the governor do?", "opts": ["Monitors tire pressure during shifts", "Displays engine speed in RPMs", "Prevents the engine from exceeding an RPM limit", "Controls fuel injection timing only at startup"], "ans": 2, "exp": "The governor prevents the engine from exceeding its maximum RPM limit, both when accelerating up through the gears and when downshifting."}, {"q": "What is 'hitting a gear' or 'hunting a gear'?", "opts": ["A technique for starting from a stopped position in first gear", "A method for finding the correct gear while the vehicle is already rolling", "A way to bypass the double-clutch procedure", "A technique for testing gear oil levels"], "ans": 1, "exp": "Hitting or hunting a gear is a skill used when the vehicle is already moving and you need to engage the proper gear by matching engine RPMs to road speed through trial and adjustment."}, {"q": "What does the tachometer display?", "opts": ["Road speed in miles per hour", "Oil pressure in PSI", "Engine speed in hundreds of RPMs", "Air pressure in the brake system"], "ans": 2, "exp": "The tachometer shows engine speed measured in hundreds of RPMs, and it guides the driver in timing upshifts and downshifts correctly."}, {"q": "Which of the following is a characteristic of a skilled shifter?", "opts": ["Riding the clutch between shifts to maintain control", "Forcing the gear shift lever into position when it resists", "Never riding the clutch and making smooth shifts without grinding", "Downshifting as early as possible for maximum engine braking"], "ans": 2, "exp": "Skilled shifters never ride the clutch, never force the shifter, and make clean transitions without grinding. Riding the clutch causes premature wear, and forcing a shift can damage the transmission."}, {"q": "What is the typical RPM change when upshifting or downshifting?", "opts": ["100 to 200 RPMs", "400 to 500 RPMs", "700 to 900 RPMs", "1,000 to 1,200 RPMs"], "ans": 1, "exp": "As a general guideline, gear changes involve approximately a 400 to 500 RPM change. Always consult the vehicle owner's manual for the exact specification."}, {"q": "What does a low gear provide compared to a high gear?", "opts": ["More road speed and less power", "Less power and less road speed", "More power and less road speed", "Equal power and road speed"], "ans": 2, "exp": "Low gears supply a large amount of power to the wheels but at limited road speeds — useful for starting and climbing. High gears reduce power but allow much higher road speeds once momentum is built."}, {"q": "In the Eaton Fuller Nine-Speed transmission, what must you do before shifting from 4th to 5th gear?", "opts": ["Push the range lever down to low range", "Lift the range lever up to high range", "Hold the splitter button in the rear position", "Rev the engine to 2,000 RPMs before shifting"], "ans": 1, "exp": "On the Nine-Speed, you must lift the range lever into high range before moving the shift lever from 4th to 5th. The transmission shifts into high range automatically as the lever passes through neutral."}, {"q": "What happens if gear changes are not smooth?", "opts": ["The truck accelerates faster", "The drive wheels can lock momentarily, which is especially dangerous on slippery surfaces or curves", "The governor automatically corrects the shift", "The transmission automatically disengages the clutch"], "ans": 1, "exp": "Mismatched RPMs cause the truck to lurch or jerk during a shift, which can momentarily lock the drive wheels. On a curve or slippery road, this can lead to a loss of vehicle control."}, {"q": "How does an automatic transmission differ from a manual or autoshift transmission?", "opts": ["It uses a range selector lever to manually choose each gear", "It uses a torque converter instead of a clutch to shift gears", "It requires the driver to double-clutch through all gear changes", "It only has five forward gear positions"], "ans": 1, "exp": "An automatic transmission uses a torque converter — rather than a clutch — to handle gear changes. A lever or button selects the operating range, and gear changes happen automatically."}, {"q": "What is the purpose of the Hold position on an autoshift transmission?", "opts": ["It permanently locks the transmission in first gear", "It keeps the transmission in the current gear until the driver uses the upshift or downshift button", "It automatically selects the most fuel-efficient gear", "It prevents the engine from exceeding governed RPMs"], "ans": 1, "exp": "In the Hold position, the autoshift transmission will not shift gears on its own. The driver must use the upshift or downshift button manually — though the transmission won't execute a shift that isn't achievable at current RPMs or load."}, {"q": "In the Rockwell Ten-Speed transmission, when downshifting from 6th to 5th, what must happen first?", "opts": ["Lift the range control lever to high range", "Press the splitter button to the rear position", "Push the range control lever down to low range", "Rev the engine to 1,800 RPMs"], "ans": 2, "exp": "On the Rockwell Ten-Speed, the driver must push the range control lever down into low range before making the shift from 6th to 5th gear."}, {"q": "Why is it important to never coast in Neutral on an automatic transmission?", "opts": ["Neutral disables the air brakes", "Coasting in Neutral can damage the transmission and cause a loss of vehicle control", "Neutral position activates the governor", "It prevents the torque converter from functioning"], "ans": 1, "exp": "Coasting in Neutral is dangerous and damaging. It can harm the transmission and reduces the driver's ability to control the vehicle — especially on downhill grades or in emergency situations."}];
+
+const ICON_PLAY  = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE  = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+let currentSlide = 0;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+let audioTimerInterval = null;
+let estimatedDuration = 0;
+let audioElapsed = 0;
+let audioPlayStart = 0;
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;
+let currentUtterance = null;
+
+function saveCurrentState(){
+  Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
+function resetThisModule(){
+  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
+    Progress.resetModule(CURRENT_MODULE_SLUG);
+    window.location.reload();
+  }
+}
+
+(function(){
+  let _start = Date.now(), _accum = 0;
+  function _flush(){
+    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
+    _accum = 0; _start = Date.now();
+    if(secs < 1) return;
+    const data = Progress._load();
+    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
+    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
+    Progress._save(data);
+  }
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden'){ _flush(); } else { _start = Date.now(); } });
+  window.addEventListener('beforeunload', _flush);
+  setInterval(_flush, 30000);
+})();
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  const _saved = Progress.loadState(CURRENT_MODULE_SLUG);
+  if(_saved){
+    unlockStatus = (_saved.unlockStatus && _saved.unlockStatus.length === slides.length) ? _saved.unlockStatus : new Array(slides.length).fill(false);
+    if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
+    else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
+  }
+  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 30'; }
+  buildDropdown();
+  buildTOC();
+  updateTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){ link.style.pointerEvents = 'none'; link.href = 'javascript:void(0)'; }
+    else if(isCompleted || isUnlocked){ link.href = '../' + m.folder + '/' + m.file; }
+    else { link.href = 'javascript:void(0)'; link.addEventListener('click', e => { e.preventDefault(); }); }
+    link.innerHTML = '<div class="dropdown-item-status"></div><div class="di-text"><div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div><div class="di-title">' + m.title + '</div></div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 30 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => { if(!wrap.contains(e.target)){ wrap.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ wrap.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); } });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){ viewMode = 'slide'; renderSlide(0); }
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  saveCurrentState();
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    <div class="narration-box">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">&#x1F50A;</span><span>Narration</span></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-text">${s.narration}</div>
+      <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">&#8592; Previous</button>
+      <div class="lock-msg" id="lockMsg">&#x1F512; Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check &#8594;' : 'Next &#8594;'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0);
+  }
+}
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  if(USE_MP3){
+    const file = AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration) currentAudio.currentTime = fromElapsedSeconds;
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => { isPlaying = true; audioPlayStart = Date.now(); setAudioControlPlaying(); startProgressTimer(); }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){ onAudioComplete(false); return; }
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    textToSpeak = text.split(/\s+/).slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){ onAudioComplete(false); }
+}
+
+function togglePlayPause(){ if(isComplete) return; if(isPlaying){ pauseAudio(); } else { resumeAudio(); } }
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  if(audioPlayStart > 0){ audioElapsed += (Date.now() - audioPlayStart) / 1000; audioPlayStart = 0; }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){ currentAudio.pause(); }
+  else if(window.speechSynthesis){
+    if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => { isPlaying = true; audioPlayStart = Date.now(); setAudioControlPlaying(); startProgressTimer(); }).catch(() => { playTTS(currentNarrationText, audioElapsed); });
+  } else { playTTS(currentNarrationText, audioElapsed); }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn'); const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){ return Math.max(8, (text.split(/\s+/).length / 155) * 60); }
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying) return;
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]) onAudioComplete(false);
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true; isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){ unlockStatus[currentSlide] = true; saveCurrentState(); }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '&#10003; Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false; audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1) renderSlide(currentSlide + 1);
+  else startQuiz();
+}
+function prevSlide(){ if(currentSlide > 0) renderSlide(currentSlide - 1); }
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '&#10003; Correct' : '&#10007; Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results &#8594;' : 'Next Question &#8594;') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else showResults();
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){ Progress.markComplete(CURRENT_MODULE_SLUG, pct); buildDropdown(); }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You’ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You’ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you’ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' &#8594;</a>'
+              : '<a class="btn btn-next" href="../index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    document.getElementById('slidePanel').innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '&#10003; You answered correctly' : '&#10007; You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">&#8592; Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next &#8594;'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>
