@@ -806,7 +806,7 @@ function showResults(){
         ${pass
           ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
             (nextModule
-              ? '<a class="btn btn-next" href="../' + nextModule.folder + '/' + nextModule.file + '">Continue to Module ' + nextModule.num + ' &#8594;</a>'
+              ? '<a class="btn btn-next" href="./' + nextModule.file + '">Continue to Module ' + nextModule.num + ' &#8594;</a>'
               : '<a class="btn btn-next" href="./index.html">Back to Course Home</a>')
           : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
       </div>

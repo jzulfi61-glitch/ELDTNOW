@@ -307,10 +307,20 @@ def process(m):
     )
     print('  FIXED  dropdown nav (folder-relative → root-relative)')
 
-    # 5. Fix results "Continue" link
+    # 5. Fix results "Continue" link — v1 style (nextMod, btn-continue)
     html = html.replace(
         "'<a class=\"btn-continue\" href=\"../'+nextMod.folder+'/'+nextMod.file+'\">'",
         "'<a class=\"btn-continue\" href=\"./'+nextMod.file+'\">'",
+    )
+    # v2 style (nextModule, btn btn-next)
+    html = html.replace(
+        "'<a class=\"btn btn-next\" href=\"../'+nextModule.folder+'/'+nextModule.file+'\">'",
+        "'<a class=\"btn btn-next\" href=\"./'+nextModule.file+'\">'",
+    )
+    # v2 style with spaces around + operators
+    html = html.replace(
+        "'<a class=\"btn btn-next\" href=\"../' + nextModule.folder + '/' + nextModule.file + '\">'",
+        "'<a class=\"btn btn-next\" href=\"./' + nextModule.file + '\">'",
     )
     print('  FIXED  results Continue link (folder-relative → root-relative)')
 
