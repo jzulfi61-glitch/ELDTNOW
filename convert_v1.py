@@ -296,6 +296,15 @@ def process(m):
         'window.location.href=\'../\'+m.folder+\'/\'+m.file;',
         "window.location.href='./'+m.file;"
     )
+    # v2 template uses link.href assignment instead of window.location.href
+    html = html.replace(
+        "link.href = '../' + m.folder + '/' + m.file;",
+        "link.href = './' + m.file;"
+    )
+    html = html.replace(
+        "link.href='../'+m.folder+'/'+m.file;",
+        "link.href='./'+m.file;"
+    )
     print('  FIXED  dropdown nav (folder-relative → root-relative)')
 
     # 5. Fix results "Continue" link
