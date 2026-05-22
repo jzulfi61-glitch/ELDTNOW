@@ -305,6 +305,14 @@ def process(m):
         "link.href='../'+m.folder+'/'+m.file;",
         "link.href='./'+m.file;"
     )
+    # v2 compact inline: a.href='../'+m.folder+'/'+m.file;
+    html = html.replace(
+        "a.href='../'+m.folder+'/'+m.file;",
+        "a.href='./'+m.file;"
+    )
+    # Fix Back-to-Home link in showResults (../index.html → ./index.html)
+    html = html.replace("href=\"../index.html\"", "href=\"./index.html\"")
+    html = html.replace("href='../index.html'", "href='./index.html'")
     print('  FIXED  dropdown nav (folder-relative → root-relative)')
 
     # 5. Fix results "Continue" link — v1 style (nextMod, btn-continue)
