@@ -316,6 +316,7 @@ const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5
 const ICON_DONE  = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
 
 let currentSlide = 0;
+let narrationCollapsed = false;
 let viewMode = 'welcome';
 let currentQuestion = 0;
 let score = 0;
@@ -571,6 +572,7 @@ function renderSlide(i){
   `;
   updateTOC();
   updateProgress();
+  if(narrationCollapsed){const b=document.getElementById('narrationBox');if(b)b.classList.add('collapsed');}
   if(unlockStatus[i]){
     setAudioControlDone();
     onAudioComplete(true);
@@ -631,6 +633,7 @@ function playTTS(text, fromElapsedSeconds){
 }
 
 function toggleNarration(){
+  narrationCollapsed=!narrationCollapsed;
   const box=document.getElementById('narrationBox');
   if(box) box.classList.toggle('collapsed');
 }
