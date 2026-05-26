@@ -163,6 +163,12 @@ header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-it
 .narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
 .audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+.narration-toggle{width:22px;height:22px;border-radius:50%;background:transparent;border:1.5px solid var(--accent-dark);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;padding:0;flex-shrink:0;transition:transform .3s,background .15s;margin-left:8px;line-height:1}
+.narration-toggle:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.narration-box.collapsed .narration-toggle{transform:rotate(180deg)}
+.narration-box.collapsed .narration-header{margin-bottom:0}
+.narration-body{overflow:hidden;max-height:1200px;opacity:1;transition:max-height .35s ease,opacity .25s ease}
+.narration-box.collapsed .narration-body{max-height:0;opacity:0}
 
 .slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
 .btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
@@ -576,16 +582,18 @@ function renderSlide(i){
     </div>
     <div class="slide-content">${s.contentHTML}</div>
     ${renderMediaHTML(s)}
-    <div class="narration-box">
+    <div class="narration-box" id="narrationBox">
       <div class="narration-header">
-        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span></div>
+        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span><button class="narration-toggle" type="button" onclick="toggleNarration()" title="Hide/show narration text">▲</button></div>
         <div class="audio-control">
           <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
           <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
         </div>
       </div>
-      <div class="narration-text">${s.narration}</div>
-      <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+      <div class="narration-body">
+        <div class="narration-text">${s.narration}</div>
+        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+      </div>
     </div>
     <div class="slide-nav">
       <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">← Previous</button>
