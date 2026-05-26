@@ -353,6 +353,7 @@ const ICON_DONE = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l
 
 // ============ STATE ============
 let currentSlide = 0;
+let narrationCollapsed = false;
 let viewMode = 'welcome';
 let currentQuestion = 0;
 let score = 0;
@@ -603,6 +604,7 @@ function renderSlide(i){
   `;
   updateTOC();
   updateProgress();
+  if(narrationCollapsed){const b=document.getElementById('narrationBox');if(b)b.classList.add('collapsed');}
   // If this slide was already completed, mark audio as complete and skip playback
   if(unlockStatus[i]){
     setAudioControlDone();
@@ -683,6 +685,11 @@ function playTTS(text, fromElapsedSeconds){
   }
 }
 
+function toggleNarration(){
+  narrationCollapsed=!narrationCollapsed;
+  const box=document.getElementById('narrationBox');
+  if(box) box.classList.toggle('collapsed');
+}
 function togglePlayPause(){
   if(isComplete) return; // button is disabled once complete; safety check
   if(isPlaying){
