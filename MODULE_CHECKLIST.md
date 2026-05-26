@@ -1,266 +1,149 @@
-# ELDT NOW — New Module Integration Checklist
+# ELDT NOW — New Module Checklist
 
-When a new module HTML file is uploaded to the root directory, run the auto-fix script first, then use the verification checklist below to confirm it worked.
+Use this when adding any of the remaining 14 modules (20–33).
 
 ---
 
-## Step 1 — Run the fix script
+## Step 1 — Create the file
+
+Copy `MODULE_TEMPLATE.html` and rename it:
+
+```
+ELDT_X.X.X_TopicName.html
+```
+
+Example: `ELDT_1.4.3_EmergencyEquipment.html`
+
+---
+
+## Step 2 — Fill in the 6 change points
+
+The template marks every spot with `← CHANGE THIS`:
+
+| # | What | Where in file |
+|---|---|---|
+| ① | `<title>` tag | `<head>` |
+| ② | Header nav label | `<strong>UNIT X.X.X</strong> Topic Name` |
+| ③ | Welcome screen | Eyebrow, h1, subtitle, objectives list |
+| ④ | `CURRENT_MODULE_SLUG` | Must match the slug in the REGISTRY |
+| ⑤ | `const slides = [...]` | Replace all 6 example slides with real content |
+| ⑥ | `const quizData = [...]` | Replace placeholder questions with 15 real ones |
+
+**Quiz rules:** exactly 15 questions, 4 options each, `ans` is zero-based index (0=A, 1=B, 2=C, 3=D).
+
+---
+
+## Step 3 — Update REGISTRY status in all files
+
+Change `"status":"pending"` → `"status":"built"` for this module's slug in:
+
+- Every existing `ELDT_*.html` file (all 19+)
+- `index.html`
+
+The simplest way is a one-liner find/replace on the slug:
+
+```python
+# Example — run from project root
+import re, glob
+SLUG = 'your-module-slug'
+pat = r'("slug":"' + SLUG + r'"[^}]+"status":")pending(")'
+for f in glob.glob('*.html'):
+    h = open(f).read()
+    new = re.sub(pat, r'\1built\2', h)
+    if new != h:
+        open(f, 'w').write(new)
+        print('updated', f)
+```
+
+Or use `_tools/fix_module.py` if the module was built externally (not from the template):
 
 ```bash
-python3 fix_module.py ELDT_1.1.5_ShiftingOperatingTransmissions.html
-```
-
-The script prints `FIXED`, `SKIP`, or `WARN` for each step:
-- **FIXED** — change was applied
-- **SKIP** — already present, nothing to do
-- **WARN** — anchor text not found; apply that step manually using the reference below
-
----
-
-## Step 2 — Verify in browser
-
-Open the module and confirm each item:
-
-- [ ] "MODULE X OF 33" counter appears in the top-right corner of the header
-- [ ] "↺ Reset This Module" button appears at the bottom of the Course Outline sidebar
-- [ ] Clicking the ELDT NOW logo returns to `index.html`
-- [ ] The All 33 Modules dropdown links open the correct files
-- [ ] Completing the quiz shows a "Continue →" link pointing to the correct next module
-- [ ] On the dashboard (`index.html`) the new module card shows as available, not locked/pending
-
----
-
-## Manual Fix Reference
-
-Use these only when the script reports WARN for a step.
-
----
-
-### 1 · Fix broken href paths
-
-**Find pattern:** `href="../[any-folder]/[filename].html"`  
-**Replace with:** `href="./[filename].html"`  
-Locations: logo link, dropdown module links, quiz "Continue" button, dashboard CTA.
-
----
-
-### 2 · Add `.module-counter` CSS
-
-**Find:**
-```
-.toc-quiz .toc-check{border-color:var(--border)}
-```
-**Insert before it:**
-```css
-.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);white-space:nowrap;margin-left:auto;padding-right:4px}
+python3 _tools/fix_module.py ELDT_X.X.X_TopicName.html
 ```
 
 ---
 
-### 3 · Add `.toc-reset` CSS
+## Step 4 — Browser verification
 
-**Find:**
-```
-.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
-```
-**Insert after it:**
-```css
-.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
-.toc-reset:hover{color:var(--danger);background:var(--light)}
-```
+Open the new module and confirm:
 
----
-
-### 4 · Add module counter `<span>` in header
-
-**Find:** `</header>`  
-**Replace with:**
-```html
-  <span class="module-counter" id="moduleCounter"></span>
-</header>
-```
+- [ ] `Module X of 33` counter appears in the header (top right)
+- [ ] `↺ Reset This Module` button appears at the bottom of the sidebar
+- [ ] Narration plays and the progress bar fills for each slide
+- [ ] Each slide's Next button is locked until narration completes
+- [ ] All 15 quiz questions display and score correctly
+- [ ] Passing (80%+) shows "You Passed!" and a **Continue to Module X+1 →** link
+- [ ] Failing shows a Retake option
+- [ ] The 33-module dropdown lists this module in the correct position
+- [ ] `index.html` shows this module as unlocked (not locked/pending) once previous module is passed
 
 ---
 
-### 5 · Add module counter JS inside `init()`
+## Step 5 — Push to GitHub
 
-**Find:** `  buildDropdown();`  
-**Replace with:**
-```js
-  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
-  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 33'; }
-  buildDropdown();
+```python
+import os, json, base64, urllib.request
+
+TOKEN = os.environ.get("GITHUB_TOKEN")
+REPO  = "jzulfi61-glitch/ELDTNOW"
+
+def push(fname):
+    with open(fname, 'rb') as f:
+        content = base64.b64encode(f.read()).decode()
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{REPO}/contents/{fname}",
+        headers={"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json"})
+    try:
+        with urllib.request.urlopen(req) as r:
+            sha = json.loads(r.read()).get("sha")
+    except:
+        sha = None
+    data = {"message": f"feat: add {fname}", "content": content}
+    if sha: data["sha"] = sha
+    req2 = urllib.request.Request(
+        f"https://api.github.com/repos/{REPO}/contents/{fname}",
+        data=json.dumps(data).encode(), method="PUT",
+        headers={"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json",
+                 "Content-Type": "application/json"})
+    with urllib.request.urlopen(req2) as r:
+        print("OK", fname)
 ```
+
+Push both the new module file and all updated files in one batch.
 
 ---
 
-### 6 · Add `resetModule` method to Progress object
+## Slide content reference
 
-**Find:**
+### Available `contentHTML` CSS classes
+
 ```
-  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } }
-};
-```
-**Replace with:**
-```js
-  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
-  resetModule(slug){
-    const data = this._load();
-    delete data[slug];
-    this._save(data);
-    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
-  }
-};
+<p class="emphasis">          highlighted callout (gold left border)
+<p class="footnote">          small grey italic footnote
+<ul class="check-list">       green checkmark bullet list
+<div class="callout">         blue info box
+<div class="callout warning"> orange warning box
+<div class="stat-grid">       responsive stat cards
+<div class="two-col">         two-column card layout
+<div class="formula-box">     dark formula display
+<table class="data-table">    styled data table
 ```
 
----
-
-### 7 · Add `resetThisModule()` function
-
-**Find** the closing `}` of `saveCurrentState()` and **insert after it:**
-```js
-function resetThisModule(){
-  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
-    Progress.resetModule(CURRENT_MODULE_SLUG);
-    window.location.reload();
-  }
-}
-```
-
----
-
-### 8 · Add Reset button in sidebar
-
-**Find:**
-```html
-    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
-      <div class="toc-check"></div>
-      <span>Knowledge Check</span>
-    </div>
-  </aside>
-```
-**Replace with:**
-```html
-    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
-      <div class="toc-check"></div>
-      <span>Knowledge Check</span>
-    </div>
-    <button class="toc-reset" onclick="resetThisModule()">↺ Reset This Module</button>
-  </aside>
-```
-
----
-
-### 9 · Add active-time tracker
-
-**Find:** `window.addEventListener('DOMContentLoaded', init);`  
-**Replace with:**
-```js
-// ── Active-time tracker ──────────────────────────────────────────────────────
-(function(){
-  let _start = Date.now(), _accum = 0;
-  function _flush(){
-    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
-    _accum = 0; _start = Date.now();
-    if(secs < 1) return;
-    const data = Progress._load();
-    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
-    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
-    Progress._save(data);
-  }
-  document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState === 'hidden'){ _flush(); }
-    else { _start = Date.now(); }
-  });
-  window.addEventListener('beforeunload', _flush);
-  setInterval(_flush, 30000);
-})();
-
-window.addEventListener('DOMContentLoaded', init);
-```
-
----
-
-### 10 · Update REGISTRY status in all other files
-
-The script handles this automatically. If done manually: in every other `.html` file (all existing modules + `index.html`), find the REGISTRY entry for this module's slug and change `"status":"pending"` to `"status":"built"`.
-
----
-
----
-
-## Adding Pictures and Videos to Slides
-
-Media is optional on any slide. Add `image` and/or `video` fields directly to a slide object in the `slides` array. Slides with no media fields render exactly as before — nothing changes.
-
-### Image only
+### Optional slide fields
 
 ```js
-{
-  section: "primary-controls",
-  sectionLabel: "Primary Controls",
-  title: "Steering Wheel Layout",
-  contentHTML: "<p>The steering wheel is larger than in a car...</p>",
-  narration: "...",
-  image: {
-    src: "./images/steering-wheel.jpg",
-    caption: "Typical CMV steering wheel with horn button"
-  }
-}
+"audioUrl": "https://…"                    // per-slide ElevenLabs URL
+"image": "images/file.jpg"                 // shorthand
+"image": {"src": "…", "caption": "…"}     // with caption
+"video": "video/file.mp4"                  // shorthand
+"video": {"src":"…","poster":"…","caption":"…"}
 ```
-
-Or shorthand (no caption):
-```js
-image: "./images/steering-wheel.jpg"
-```
-
-### Video only
-
-```js
-{
-  ...
-  video: {
-    src: "./videos/pretrip-walkaround.mp4",
-    poster: "./images/pretrip-poster.jpg",
-    caption: "Pre-trip inspection walkaround — watch before proceeding"
-  }
-}
-```
-
-Or shorthand (no poster, no caption):
-```js
-video: "./videos/pretrip-walkaround.mp4"
-```
-
-### Both image and video on the same slide
-
-```js
-{
-  ...
-  image: { src: "./images/dash-diagram.jpg", caption: "Instrument cluster diagram" },
-  video: { src: "./videos/dash-overview.mp4", caption: "Dashboard walkthrough video" }
-}
-```
-
-### File placement
-
-Place media files in subdirectories in the project root:
-- `./images/` — for photos and diagrams
-- `./videos/` — for MP4 clips
-
-### Supported formats
-- **Images**: JPG, PNG, WebP, SVG
-- **Video**: MP4 (H.264) — recommended for broadest browser support
-
-### How replay works
-
-Videos use the browser's native `<video controls>` player (play/pause/seek/volume built in) plus a dedicated **↺ Replay** button overlaid in the bottom-right corner that resets to the beginning and plays automatically.
 
 ---
 
-## localStorage keys (for reference)
+## localStorage keys
 
 | Key | Contents |
 |-----|----------|
-| `eldtnow_progress` | JSON object — completion record for all 33 modules |
-| `eldtnow_progress_state_{slug}` | JSON object — slide position, unlock status, view mode for one module |
+| `eldtnow_progress` | Completion record for all 33 modules |
+| `eldtnow_progress_state_{slug}` | Slide position + unlock status for one module |
