@@ -1,6 +1,6 @@
 # ELDT NOW — New Module Checklist
 
-Use this when adding any of the remaining 14 modules (20–33).
+Use this when adding the remaining 2 modules (29–30) or any bonus modules.
 
 ---
 
@@ -37,7 +37,7 @@ The template marks every spot with `← CHANGE THIS`:
 
 Change `"status":"pending"` → `"status":"built"` for this module's slug in:
 
-- Every existing `ELDT_*.html` file (all 19+)
+- Every existing `ELDT_*.html` file (all existing modules)
 - `index.html`
 
 The simplest way is a one-liner find/replace on the slug:
@@ -67,14 +67,14 @@ python3 _tools/fix_module.py ELDT_X.X.X_TopicName.html
 
 Open the new module and confirm:
 
-- [ ] `Module X of 33` counter appears in the header (top right)
+- [ ] `Module X of 30` counter appears in the header (top right)
 - [ ] `↺ Reset This Module` button appears at the bottom of the sidebar
 - [ ] Narration plays and the progress bar fills for each slide
 - [ ] Each slide's Next button is locked until narration completes
 - [ ] All 15 quiz questions display and score correctly
 - [ ] Passing (80%+) shows "You Passed!" and a **Continue to Module X+1 →** link
 - [ ] Failing shows a Retake option
-- [ ] The 33-module dropdown lists this module in the correct position
+- [ ] The 30-module dropdown lists this module in the correct position
 - [ ] `index.html` shows this module as unlocked (not locked/pending) once previous module is passed
 
 ---
@@ -145,5 +145,5 @@ Push both the new module file and all updated files in one batch.
 
 | Key | Contents |
 |-----|----------|
-| `eldtnow_progress` | Completion record for all 33 modules |
+| `eldtnow_progress` | Completion record for all 30 modules |
 | `eldtnow_progress_state_{slug}` | Slide position + unlock status for one module |
