@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ELDT NOW — MODULE TEMPLATE                                                  ║
+║  Copy this file, rename it to ELDT_X.X.X_TopicName.html, then:              ║
+║  1. Update the 6 HTML fields marked  ← CHANGE THIS  in the <head>/<body>    ║
+║  2. Set CURRENT_MODULE_SLUG  (line ~360)                                     ║
+║  3. Replace the slides[] array with the module content                       ║
+║  4. Replace the quizData[] array (exactly 15 questions)                      ║
+║  Nothing else needs to change — all CSS, JS, and boilerplate are shared.     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ① CHANGE: page title ─────────────────────────────────────────────────── -->
+<title>ELDT NOW · Module 25 · Post-Crash Procedures</title>
+<!-- ──────────────────────────────────────────────────────────────────────── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+.module-counter strong{color:var(--accent);font-weight:700}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
+.toc-reset:hover{color:var(--danger);background:var(--light)}
+
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding-left:14px;margin:18px 0;background:#fffdf6;padding:12px 16px;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.class-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.class-letter{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1;background:var(--navy);color:var(--accent);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.class-desc{font-size:14px;color:var(--text);line-height:1.45}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.formula-box{background:#0d1b2a;color:#fff;border-radius:8px;padding:20px;margin:18px 0}
+.formula{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-align:center;padding:10px 0;color:var(--accent);letter-spacing:1px}
+.formula-key{list-style:none;margin:14px 0 0 0!important;font-size:14px;color:rgba(255,255,255,.85)}
+.formula-key li{padding:4px 0 4px 20px;position:relative;line-height:1.5;margin:0!important}
+.formula-key li::before{content:"•";position:absolute;left:0;color:var(--accent)}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td.ok{color:var(--success);font-weight:700}
+.data-table td.bad{color:var(--danger);font-weight:700}
+.slide-media{padding:0 40px 24px;display:flex;flex-direction:column;gap:18px}
+.slide-figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.slide-img{width:100%;max-height:480px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:#f7f9fb}
+.slide-video-wrap{position:relative;width:100%;background:#000;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.slide-video{width:100%;display:block;max-height:480px}
+.video-replay-btn{position:absolute;bottom:10px;right:10px;background:rgba(13,27,42,.75);color:#fff;border:none;padding:5px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.video-replay-btn:hover{background:var(--accent);color:#000}
+.slide-figure figcaption{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:0 8px}
+
+/* ---- Narration box with pause/play control ---- */
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+.narration-toggle{width:22px;height:22px;border-radius:50%;background:transparent;border:1.5px solid var(--accent-dark);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;padding:0;flex-shrink:0;transition:transform .3s,background .15s;margin-left:8px;line-height:1}
+.narration-toggle:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.narration-box.collapsed .narration-toggle{transform:rotate(180deg)}
+.narration-box.collapsed .narration-header{margin-bottom:0}
+.narration-body{overflow:hidden;max-height:1200px;opacity:1;transition:max-height .35s ease,opacity .25s ease}
+.narration-box.collapsed .narration-body{max-height:0;opacity:0}
+
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .slide-media{padding:0 24px 20px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <!-- ② CHANGE: unit number and module title in the header nav trigger ── -->
+      <span><strong>UNIT 1.5.5</strong> Post-Crash Procedures</span>
+      <!-- ──────────────────────────────────────────────────────────────────── -->
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 33 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 33 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="./index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+  <span class="module-counter" id="moduleCounter"></span>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <!-- ③ CHANGE: welcome screen — eyebrow, h1, subtitle, objectives ────── -->
+      <div class="welcome-eyebrow">Module 25 · Unit 1.5.5</div>
+      <h1>Post-Crash Procedures</h1>
+      <div class="welcome-unit">Know what to do before you need to do it.</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul>
+          <li>Describe the six immediate steps after an accident: stop, warning devices, injuries, law enforcement, document, contact carrier</li>
+          <li>Explain when post-accident testing is required and the time limits: alcohol within 8 hours, drug within 32 hours</li>
+          <li>Apply the fire tetrahedron concept and identify the four fire classes</li>
+          <li>Use the PASS method to operate a fire extinguisher</li>
+        </ul>
+      </div>
+      <!-- ──────────────────────────────────────────────────────────────────── -->
+      <button class="btn-start" onclick="startCourse()">Begin Course</button>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>
+      <span>Knowledge Check</span>
+    </div>
+    <button class="toc-reset" onclick="resetThisModule()">↺ Reset This Module</button>
+  </aside>
+</div>
+
+<script>
+// ============ CONFIG ============
+// ── AUDIO CONFIGURATION ─────────────────────────────────────────────────────
+// To activate ElevenLabs (or any MP3) professional narration, two options:
+//
+// OPTION A — Module-wide MP3: set USE_MP3 = true and place audio files in the
+//   audio/ folder named slide_00.mp3, slide_01.mp3 … (zero-padded slide index).
+//   Falls back to browser TTS automatically if any file fails to load.
+//
+// OPTION B — Per-slide URL: add  "audioUrl": "https://…"  to any slide object
+//   in the slides array below. That slide plays its specific URL; the rest use
+//   the USE_MP3 setting. Ideal for individual ElevenLabs audio clips.
+//
+// IMAGES: add  "image": "path/to/image.jpg"  (or {src, caption}) to any slide.
+// VIDEOS: add  "video": "path/to/clip.mp4"   (or {src, poster, caption}) to any slide.
+// ─────────────────────────────────────────────────────────────────────────────
+const USE_MP3 = false;           // ← set true to use MP3 files for all slides
+const AUDIO_BASE_PATH = './audio/'; // ← folder for slide_00.mp3, slide_01.mp3 …
+const NARRATION_RATE = 0.95;
+
+// ============ CROSS-MODULE PROGRESS SYSTEM ============
+// Tracks completion of all 33 modules. Currently localStorage-based.
+// To migrate to a backend account system later, replace the four method
+// bodies below with API calls. The rest of the application code does not
+// need to change.
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  },
+  saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
+  resetModule(slug){
+    const data = this._load();
+    delete data[slug];
+    this._save(data);
+    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
+  }
+};
+
+// ============ MODULE-LEVEL DATA ============
+// REGISTRY — master list of all 33 modules. This is identical across every module.
+// Update status from "pending" to "built" once a module file is ready.
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"built"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"built"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"built"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control and Recovery","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":23,"slug":"hours-of-service","unit":"1.5.3","title":"Hours of Service Requirements","file":"ELDT_1.5.3_HoursOfServiceRequirements.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":24,"slug":"fatigue-wellness","unit":"1.5.4","title":"Fatigue and Wellness Awareness","file":"ELDT_1.5.4_FatigueAndWellnessAwareness.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":25,"slug":"post-crash-procedures","unit":"1.5.5","title":"Post-Crash Procedures","file":"ELDT_1.5.5_PostCrashProcedures.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":26,"slug":"module-26","unit":"1.6.1","title":"Module 26 Title","file":"ELDT_1.6.1_Module26.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":27,"slug":"module-27","unit":"1.6.2","title":"Module 27 Title","file":"ELDT_1.6.2_Module27.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":28,"slug":"module-28","unit":"1.6.3","title":"Module 28 Title","file":"ELDT_1.6.3_Module28.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":29,"slug":"module-29","unit":"1.7.1","title":"Module 29 Title","file":"ELDT_1.7.1_Module29.html","group":"A1.7 — Accident Procedures","status":"pending"},{"num":30,"slug":"module-30","unit":"1.7.2","title":"Module 30 Title","file":"ELDT_1.7.2_Module30.html","group":"A1.7 — Accident Procedures","status":"pending"},{"num":31,"slug":"module-31","unit":"1.8.1","title":"Module 31 Title","file":"ELDT_1.8.1_Module31.html","group":"A1.8 — Wellness","status":"pending"},{"num":32,"slug":"module-32","unit":"1.8.2","title":"Module 32 Title","file":"ELDT_1.8.2_Module32.html","group":"A1.8 — Wellness","status":"pending"},{"num":33,"slug":"module-33","unit":"1.9.1","title":"Module 33 Title","file":"ELDT_1.9.1_Module33.html","group":"A1.9 — Whistleblower","status":"pending"}];
+
+// ④ CHANGE: slug must match this module's "slug" value in the REGISTRY above ─
+const CURRENT_MODULE_SLUG = 'post-crash-procedures';
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── SLIDE DATA ───────────────────────────────────────────────────────────────
+// Each slide object supports these optional fields beyond section/title/contentHTML/narration:
+//   audioUrl : string  — per-slide ElevenLabs or MP3 URL (overrides USE_MP3 for this slide)
+//              e.g.  "audioUrl": "https://api.elevenlabs.io/v1/text-to-speech/…"
+//              or    "audioUrl": "./audio/slide_00.mp3"
+//   image    : string | {src, caption}  — image displayed below slide content
+//              e.g.  "image": "images/stopping-distance.jpg"
+//              or    "image": {"src": "images/diagram.jpg", "caption": "Figure 1"}
+//   video    : string | {src, poster, caption}  — video clip displayed below content
+//              e.g.  "video": "video/brake-demo.mp4"
+//              or    "video": {"src": "video/clip.mp4", "poster": "thumb.jpg", "caption": "Demo"}
+// ─────────────────────────────────────────────────────────────────────────────
+// ⑤ CHANGE: replace ALL slide objects below with this module's content ────────
+//
+// SLIDE OBJECT SHAPE:
+// {
+//   "section":      "section-id",          // groups slides in the TOC sidebar
+//   "sectionLabel": "Section Display Name", // shown as the TOC group header
+//   "title":        "Slide Title",          // shown in the blue slide header bar
+//   "contentHTML":  "<p>…</p>",            // main body HTML (see CSS classes below)
+//   "narration":    "Full narration text.", // read aloud / shown as narration text
+//
+//   // OPTIONAL — leave these out if not needed:
+//   "audioUrl":  "https://…",             // ElevenLabs URL for this slide only
+//   "image":     "images/file.jpg",        // or {"src":"…","caption":"…"}
+//   "video":     "video/file.mp4"          // or {"src":"…","poster":"…","caption":"…"}
+// }
+//
+// AVAILABLE contentHTML CSS CLASSES:
+//   <p class="emphasis">          — highlighted callout paragraph (gold left border)
+//   <p class="footnote">          — small grey italic footnote
+//   <ul class="check-list">       — bulleted list with green checkmarks
+//   <div class="callout">         — blue info box
+//   <div class="callout warning"> — orange warning box
+//   <div class="stat-grid">       — responsive grid of stat-card divs
+//     <div class="stat-card"><div class="stat-num">70%</div><div class="stat-label">label</div></div>
+//   <div class="two-col">         — responsive two-column card layout
+//     <div class="col-card"><h4>Title</h4><p>Body text</p></div>
+//   <div class="class-grid">      — CDL class card grid (class-letter + class-desc)
+//   <div class="formula-box">     — dark formula display box
+//     <div class="formula">W = 500 × …</div>
+//     <ul class="formula-key"><li><strong>W</strong> = …</li></ul>
+//   <table class="data-table">   — styled data table with <th>, <td class="ok">, <td class="bad">
+// ─────────────────────────────────────────────────────────────────────────────
+const slides = [
+  {
+    "section": "intro",
+    "sectionLabel": "Introduction",
+    "title": "Post-Crash Procedures: Know What to Do Before You Need To",
+    "contentHTML": "<ul>\n      <li>No matter how safely you operate, there is always a possibility of being involved in an accident</li>\n      <li>In the immediate aftermath, it is hard to think clearly — and hard to remember what you are required to do</li>\n      <li>Knowing the steps before an accident occurs allows you to act correctly under stress</li>\n      <li>This module covers: securing the scene, post-accident testing, documentation, hazmat accidents, vehicle fires, and fire extinguisher use</li>\n    </ul>",
+    "narration": "No matter how safely you operate your commercial motor vehicle, there is always a possibility that you could be involved in an accident. In the immediate aftermath it's hard to think clearly — hard to know what to do, and hard to remember what you're required to do as a CMV driver. Knowing these steps before you need them is what allows you to act correctly under pressure. This module covers securing the scene, post-accident drug and alcohol testing, documentation, contacting your motor carrier, hazmat accident considerations, vehicle fires, and how to use a fire extinguisher."
+  },
+  {
+    "section": "intro",
+    "sectionLabel": "Introduction",
+    "title": "Learning Objectives",
+    "contentHTML": "<p>By the end of this module, you will be able to:</p><ul>\n      <li>Describe the steps to take to secure the scene after an accident</li>\n      <li>Discuss post-accident drug and alcohol testing requirements</li>\n      <li>Explain the procedures to follow in a vehicle fire, including how to use a fire extinguisher</li>\n    </ul>",
+    "narration": "By the end of this module you'll know the steps to take immediately after an accident to secure the scene, understand when post-accident drug and alcohol testing is required and the consequences of refusal, and know how to respond to and fight a vehicle fire using the PASS technique."
+  },
+  {
+    "section": "definitions",
+    "sectionLabel": "Definitions and Requirements",
+    "title": "What Is an Accident and the Accident Register",
+    "contentHTML": "<p>Under the FMCSRs, an <strong>\"accident\"</strong> is any occurrence involving a CMV on a highway that:</p>\n    <ul>\n      <li>Involves a fatality</li>\n      <li>Causes injury requiring <strong>immediate medical treatment away from the scene</strong>, or</li>\n      <li>Results in disabling damage requiring a vehicle to be <strong>towed from the scene</strong></li>\n    </ul>\n    <p><strong>Accident register — §390.15(b):</strong></p>\n    <p>Motor carriers must maintain an accident register for 3 years. For each accident it must include:</p>\n    <ul>\n      <li>Date and location (city/town and state)</li>\n      <li>Driver name</li>\n      <li>Number of injuries and fatalities</li>\n      <li>Whether hazardous materials (other than fuel) were released</li>\n    </ul>",
+    "narration": "Not every incident on the road rises to the level of an FMCSA-defined accident. Under the FMCSRs, an accident is specifically any occurrence involving a CMV on a highway that results in a fatality, causes injury requiring immediate medical treatment away from the scene, or results in disabling damage requiring a vehicle to be towed. Motor carriers must maintain an accident register for at least three years, recording the date, location, driver name, number of injuries and fatalities, and whether any hazardous materials were released."
+  },
+  {
+    "section": "scene",
+    "sectionLabel": "Securing the Scene",
+    "title": "Immediate Steps: Stop, Warning Devices, and Check for Injuries",
+    "contentHTML": "<p><strong>Step 1 — Stop immediately:</strong></p>\n    <ul>\n      <li>Failure to stop is a serious offense listed as a disqualifying offense under the FMCSRs</li>\n      <li>Pull to the nearest safe location that does not obstruct traffic more than necessary</li>\n    </ul>\n    <p><strong>Step 2 — Set out emergency warning devices:</strong></p>\n    <ul>\n      <li>Per the regulations, you have <strong>10 minutes</strong> to set out warning devices</li>\n      <li>Wear a reflective vest; approach oncoming traffic holding devices in front for maximum visibility</li>\n      <li>Placement depends on location: on a two-lane road, place devices 10 feet, 100 feet, and 200 feet from the vehicle in each direction; on a divided highway, place on the traffic side only</li>\n    </ul>\n    <p><strong>Step 3 — Check for injuries:</strong></p>\n    <ul>\n      <li>Trauma and adrenaline can mask injuries — take a moment to calm yourself and assess</li>\n      <li>Call for emergency help; if possible, keep injured persons warm, dry, and company until help arrives</li>\n      <li>Do not move seriously injured people unless they are in immediate danger</li>\n    </ul>",
+    "narration": "In the immediate aftermath of an accident, three steps must happen fast. First, stop immediately. Leaving the scene is a serious offense — one of the disqualifying offenses under the FMCSRs. Pull to the nearest safe location without blocking traffic more than necessary. Second, set out emergency warning devices. The regulations give you 10 minutes. Wear a reflective vest and approach oncoming traffic holding the devices in front of you for maximum visibility. Third, check for injuries — including your own. Trauma and adrenaline can mask injuries you may not feel initially. Call for help, and if possible, keep injured persons warm, dry, and with company until emergency services arrive. Do not move seriously injured persons unless they are in immediate danger."
+  },
+  {
+    "section": "scene",
+    "sectionLabel": "Securing the Scene",
+    "title": "Notify Law Enforcement, Document, and Contact Your Carrier",
+    "contentHTML": "<p><strong>Notify law enforcement:</strong></p>\n    <ul>\n      <li>Required even if medical assistance is not needed</li>\n      <li>Provide: exact location, number of injured and severity, whether hazmat is involved, whether a tow is needed</li>\n      <li>If you cannot call, assign the task to someone at the scene</li>\n    </ul>\n    <p><strong>Document the accident:</strong></p>\n    <ul>\n      <li>Record while information is fresh: time and location, description of what happened, weather and road conditions, names and contact info of all parties and witnesses</li>\n      <li>Photograph the scene, vehicles, and any injuries if possible — a camera is one of the most useful items at any accident scene</li>\n      <li>Some states require documentation before leaving the scene</li>\n    </ul>\n    <p><strong>Contact your motor carrier:</strong></p>\n    <ul>\n      <li>Notify your carrier as soon as possible — they have legal and operational interests in the accident</li>\n      <li>Provide the same facts included in your on-scene documentation</li>\n      <li>Know in advance who to call and how to reach them</li>\n    </ul>\n    <div class=\"callout warning\">Do not discuss specifics with others at the scene. Do not admit fault. Do not try to settle anything at the scene — that is the job of law enforcement, insurers, and the carrier.</div>",
+    "narration": "After immediate safety is addressed, three more steps follow. Notify law enforcement — it is required even when no one is injured. Provide the exact location, number of injured persons and severity, whether hazmat is involved, and whether a tow is required. Document the accident in detail while everything is fresh: time and location, what happened, weather and road conditions, names and contacts of all parties and witnesses. Photograph the scene and vehicles. Contact your motor carrier as soon as possible — the accident affects them legally and operationally. Provide the same facts you documented. And a critical rule: do not discuss specifics at the scene, do not admit fault, and do not try to settle anything there. Those are the jobs of law enforcement, insurance representatives, and the motor carrier."
+  },
+  {
+    "section": "testing",
+    "sectionLabel": "Post-Accident Testing",
+    "title": "Post-Accident Drug and Alcohol Testing",
+    "contentHTML": "<p>Post-accident drug and alcohol testing is <strong>required</strong> when:</p>\n    <ul>\n      <li>Any person involved in the accident <strong>dies</strong>, OR</li>\n      <li>You are cited for a moving violation AND the accident involved <strong>injury requiring immediate medical treatment away from the scene</strong>, OR</li>\n      <li>You are cited for a moving violation AND the accident resulted in <strong>disabling damage requiring a vehicle to be towed</strong></li>\n    </ul>\n    <p><strong>Timeframes:</strong></p>\n    <ul>\n      <li>Alcohol test must be completed within <strong>8 hours</strong> of the accident</li>\n      <li>Drug test must be completed within <strong>32 hours</strong></li>\n      <li>If a test is not administered in time, you must document the reason why</li>\n    </ul>\n    <p><strong>Consequences of refusal:</strong></p>\n    <ul>\n      <li>Treated the same as a positive test result</li>\n      <li>Results in immediate removal from safety-sensitive functions</li>\n    </ul>",
+    "narration": "Post-accident drug and alcohol testing is federally required under specific conditions. Testing is required if anyone dies, or if you are cited for a moving violation and the accident involved injury requiring immediate medical treatment away from the scene, or disabling damage requiring a tow. Your carrier will instruct you on where to go for testing. The alcohol test must be completed within 8 hours; the drug test within 32 hours. If either test cannot be administered within the required window, the reason must be documented. Refusing to submit to testing is treated the same as a positive result — you will be removed from safety-sensitive functions immediately."
+  },
+  {
+    "section": "hazmat",
+    "sectionLabel": "Special Situations",
+    "title": "Hazmat Accidents and the Preliminary Report",
+    "contentHTML": "<p><strong>Hazardous materials accidents:</strong></p>\n    <ul>\n      <li>When a hazmat accident or incident occurs, additional risks to safety, health, and the environment exist</li>\n      <li>Immediately report any hazmat incident to your company</li>\n      <li>Regulatory notifications may be required — your carrier will advise (see also Module 22 for HMR reporting requirements)</li>\n      <li>Your employer must provide training on responding to leaks, spills, and emergencies before you haul hazmat</li>\n    </ul>\n    <p><strong>Preliminary accident report:</strong></p>\n    <ul>\n      <li>Many carriers use a preliminary accident report as part of their investigation</li>\n      <li>You may be required to complete one before leaving the scene or shortly after</li>\n      <li>Provide factual, accurate information — do not speculate or assign blame</li>\n    </ul>\n    <p><strong>Handling the disabled vehicle:</strong></p>\n    <ul>\n      <li>Your carrier will direct you on whether to have the vehicle towed or driven to a repair station</li>\n      <li>If driving, conduct a thorough pre-trip inspection first to confirm safety</li>\n    </ul>",
+    "narration": "If your accident involves hazardous materials, additional risks and regulatory requirements apply. Report any hazmat incident to your company immediately. Regulatory notification requirements — including the National Response Center — may apply depending on the material involved. Your employer must have trained you on hazmat emergency response procedures before you carry hazmat. Regarding the vehicle: your carrier will direct you on whether to have it towed or driven from the scene. If you are authorized to drive it, conduct a thorough pre-trip inspection first. Many carriers also require a preliminary accident report before you leave the scene or shortly after — provide factual information only."
+  },
+  {
+    "section": "fires",
+    "sectionLabel": "Vehicle Fires",
+    "title": "Fire Prevention and Fire Classifications",
+    "contentHTML": "<p><strong>The fire tetrahedron — four elements required for fire:</strong></p>\n    <div class=\"stat-grid\">\n      <div class=\"stat-card\"><div class=\"stat-num\">🔥</div><div class=\"stat-label\"><strong>Oxygen</strong></div></div>\n      <div class=\"stat-card\"><div class=\"stat-num\">🌡️</div><div class=\"stat-label\"><strong>Heat</strong></div></div>\n      <div class=\"stat-card\"><div class=\"stat-num\">⛽</div><div class=\"stat-label\"><strong>Fuel</strong></div></div>\n      <div class=\"stat-card\"><div class=\"stat-num\">⚗️</div><div class=\"stat-label\"><strong>Chemical Chain Reaction</strong></div></div>\n    </div>\n    <p>Fire prevention means keeping these elements from coming together. Remove any one element and the fire cannot continue.</p>\n    <p><strong>The four fire classes (NFPA):</strong></p>\n    <table class=\"data-table\">\n      <tr><th>Class</th><th>Combustible</th></tr>\n      <tr><td><strong>A</strong></td><td>Ordinary combustibles: wood, cloth, paper</td></tr>\n      <tr><td><strong>B</strong></td><td>Flammable liquids, gases, and greases</td></tr>\n      <tr><td><strong>C</strong></td><td>Electrical equipment fires</td></tr>\n      <tr><td><strong>D</strong></td><td>Combustible metals</td></tr>\n    </table>",
+    "narration": "Fire is made possible by four components — the fire tetrahedron: oxygen, heat, fuel, and a chemical chain reaction. Remove any one element and a fire cannot begin or continue. Fire prevention revolves around keeping those elements from coming together. The National Fire Protection Association classifies fires into four classes based on the combustible material involved. Class A fires involve ordinary combustibles — wood, cloth, and paper. Class B involves flammable liquids, gases, and greases. Class C involves electrical equipment fires. Class D involves combustible metals. Knowing the class of fire matters because different extinguishers are designed for different classes."
+  },
+  {
+    "section": "fires",
+    "sectionLabel": "Vehicle Fires",
+    "title": "Using a Fire Extinguisher: PASS",
+    "contentHTML": "<p><strong>Before using a fire extinguisher:</strong></p>\n    <ul>\n      <li>Your safety first — if a fire is too large or dangerous, evacuate and wait for professionals</li>\n      <li>Move the vehicle away from other vehicles, people, and buildings if possible</li>\n      <li>Position yourself <strong>8 to 10 feet</strong> from the fire with the wind at your back</li>\n      <li>Use an extinguisher rated for the class of fire you are facing</li>\n    </ul>\n    <p><strong>The PASS method:</strong></p>\n    <div class=\"two-col\">\n      <div class=\"col-card\"><h4>P — Pull the pin</h4><p>Stand back 8 to 10 feet from the fire before pulling the pin</p></div>\n      <div class=\"col-card\"><h4>A — Aim</h4><p>Aim the nozzle at the <strong>base</strong> of the fire — not the flames</p></div>\n      <div class=\"col-card\"><h4>S — Squeeze</h4><p>Squeeze the handle to release the extinguishing agent</p></div>\n      <div class=\"col-card\"><h4>S — Sweep</h4><p>Sweep the nozzle from side to side at the base of the fire</p></div>\n    </div>\n    <p><strong>Cab/engine fires:</strong> Turn off the engine; do not open the hood — introducing air can cause a flare-up; use engine vents to apply the extinguisher if available.</p>\n    <p><strong>Tire fires:</strong> Keep your distance; tire fires are extremely hot and difficult to extinguish. Keep other vehicles away.</p>",
+    "narration": "When using a fire extinguisher, position yourself 8 to 10 feet from the fire with the wind at your back so the extinguisher contents do not blow back at you and to keep you away from smoke and fumes. Use the PASS method: Pull the pin, Aim at the base of the fire — not the flames themselves, Squeeze the handle to discharge the agent, and Sweep from side to side at the base. Always use an extinguisher rated for the class of fire you're facing. For cab and engine fires: turn off the engine, do not open the hood fully as introducing air can cause a flare-up, and use engine vents to apply the agent if possible. Tire fires are extremely hot and difficult to put out — keep distance and keep other vehicles away. If any fire is too large or dangerous to handle safely, get yourself and others away and leave it to emergency responders."
+  },
+  {
+    "section": "wrapup",
+    "sectionLabel": "Wrap-Up",
+    "title": "What You've Covered",
+    "contentHTML": "<p>You should now be able to:</p>\n    <ul class=\"check-list\">\n      <li>State the FMCSA definition of an accident: fatality, injury requiring treatment away from scene, or disabling damage requiring a tow</li>\n      <li>Describe the six steps at an accident scene: stop, set warning devices within 10 minutes, check injuries, notify law enforcement, document, contact carrier</li>\n      <li>Know when post-accident testing is required and the time limits: alcohol within 8 hours, drug within 32 hours</li>\n      <li>Explain the fire tetrahedron (oxygen, heat, fuel, chemical chain reaction) and the four fire classes (A/B/C/D)</li>\n      <li>Apply the PASS method: Pull the pin, Aim at the base, Squeeze the handle, Sweep side to side</li>\n      <li>Describe the dos and don'ts at an accident scene: document accurately, do not admit fault, do not discuss specifics</li>\n    </ul>\n    <p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 26.</p>",
+    "narration": "That wraps up Module 25. You now understand the FMCSA definition of an accident, the six immediate steps at the scene, when post-accident testing is required and the time limits, the fire tetrahedron and fire classifications, and how to use a fire extinguisher with the PASS technique. Up next is the Knowledge Check. Score 80 percent or higher to pass and unlock Module 26."
+  }
+]
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ⑥ CHANGE: replace with this module's 15 quiz questions ─────────────────────
+//
+// QUIZ OBJECT SHAPE:
+// {
+//   "q":    "Question text?",
+//   "opts": ["Option A", "Option B", "Option C", "Option D"],
+//   "ans":  0,   // zero-based index of the CORRECT option (0=A, 1=B, 2=C, 3=D)
+//   "exp":  "Explanation shown after answering — explain WHY the correct answer is right."
+// }
+// Always exactly 15 questions. Pass threshold is 80% = 12 of 15 correct.
+// ─────────────────────────────────────────────────────────────────────────────
+const quizData = [
+  {
+    "q": "Under the FMCSRs, which of the following qualifies as an 'accident'?",
+    "opts": [
+      "Any fender bender regardless of damage",
+      "An occurrence involving a CMV that results in a fatality, injury requiring immediate medical treatment away from the scene, or disabling damage requiring a tow",
+      "Any incident requiring a police report, regardless of severity",
+      "Any incident in which the CMV driver receives a citation"
+    ],
+    "ans": 1,
+    "exp": "Under the FMCSRs, an accident is specifically an occurrence involving a CMV on a highway that results in a fatality, causes injury requiring immediate medical treatment away from the scene, or results in disabling damage requiring a vehicle to be towed from the scene."
+  },
+  {
+    "q": "Why is failing to stop at the scene of an accident a serious offense?",
+    "opts": [
+      "It is primarily a financial offense that results in fines",
+      "Leaving the scene is a disqualifying offense under the FMCSRs — it can result in CDL disqualification",
+      "It is only serious if the accident involved another CMV",
+      "Failure to stop is a minor infraction penalized only in certain states"
+    ],
+    "ans": 1,
+    "exp": "Failure to stop at the scene of an accident is listed as a disqualifying offense under the FMCSRs. It is a serious criminal offense that can result in CDL disqualification in addition to criminal penalties."
+  },
+  {
+    "q": "How long do you have to set out emergency warning devices after an accident?",
+    "opts": [
+      "2 minutes",
+      "5 minutes",
+      "10 minutes",
+      "30 minutes"
+    ],
+    "ans": 2,
+    "exp": "Per FMCSA regulations, you have 10 minutes to set out emergency warning devices after stopping. You should wear a reflective vest and approach oncoming traffic holding the devices in front of you for maximum visibility."
+  },
+  {
+    "q": "What should you do for injured persons at the accident scene while waiting for emergency services?",
+    "opts": [
+      "Move them to the side of the road to keep them away from traffic",
+      "Do not move seriously injured persons unless in immediate danger; keep them warm, dry, and with company if possible",
+      "Administer first aid medications from your on-board first aid kit",
+      "Have them sign a waiver before providing any assistance"
+    ],
+    "ans": 1,
+    "exp": "Do not move seriously injured persons unless they are in immediate danger from fire, traffic, or other hazards. Keep them warm and dry, provide reassurance, and stay with them until emergency services arrive."
+  },
+  {
+    "q": "Post-accident drug and alcohol testing is required when which of the following conditions are met?",
+    "opts": [
+      "Any time an accident results in vehicle damage, regardless of severity",
+      "When any person dies, or when you are cited for a moving violation and the accident involved injury requiring medical treatment away from the scene or disabling damage requiring a tow",
+      "Only when the driver is suspected of impairment by the investigating officer",
+      "Only for accidents occurring on interstate highways"
+    ],
+    "ans": 1,
+    "exp": "Post-accident testing is required when any person involved dies, or when the driver is cited for a moving violation AND the accident involved injury requiring immediate medical treatment away from the scene, or disabling damage requiring a vehicle to be towed."
+  },
+  {
+    "q": "What is the time limit for completing the alcohol test after a qualifying post-accident?",
+    "opts": [
+      "2 hours",
+      "8 hours",
+      "24 hours",
+      "32 hours"
+    ],
+    "ans": 1,
+    "exp": "The alcohol test must be completed within 8 hours of the accident. The drug test must be completed within 32 hours. If either test cannot be completed in time, the reason must be documented."
+  },
+  {
+    "q": "What happens if a driver refuses post-accident drug or alcohol testing?",
+    "opts": [
+      "The refusal is noted but has no regulatory consequence",
+      "Refusal is treated the same as a positive test result — the driver is immediately removed from safety-sensitive functions",
+      "The driver must be retested within 72 hours",
+      "The driver receives a warning but may continue operating"
+    ],
+    "ans": 1,
+    "exp": "Refusing to submit to a post-accident drug or alcohol test is treated the same as testing positive. The driver is immediately removed from safety-sensitive functions and must complete the return-to-duty process before resuming safety-sensitive duties."
+  },
+  {
+    "q": "What should you NOT do at the scene of an accident?",
+    "opts": [
+      "Set out emergency warning devices",
+      "Check for injuries",
+      "Discuss specific details of the accident with others at the scene, admit fault, or try to settle anything there",
+      "Document the accident scene with photographs"
+    ],
+    "ans": 2,
+    "exp": "You should not discuss the specifics of the accident with others at the scene, volunteer unnecessary information, admit fault, or try to settle anything at the scene. Settling disputes and assigning liability is the responsibility of law enforcement, insurance representatives, and the motor carrier."
+  },
+  {
+    "q": "What are the four components of the fire tetrahedron?",
+    "opts": [
+      "Wood, paper, gas, and oil",
+      "Oxygen, heat, fuel, and chemical chain reaction",
+      "Ignition, combustion, flame, and smoke",
+      "Spark, air, flammable material, and temperature"
+    ],
+    "ans": 1,
+    "exp": "The fire tetrahedron consists of four components required for fire: oxygen, heat, fuel, and a chemical chain reaction. Fire prevention and suppression revolve around removing or interrupting at least one of these elements."
+  },
+  {
+    "q": "What class of fire involves flammable liquids, gases, and greases?",
+    "opts": [
+      "Class A",
+      "Class B",
+      "Class C",
+      "Class D"
+    ],
+    "ans": 1,
+    "exp": "Class B fires involve flammable liquids, gases, and greases. Class A involves ordinary combustibles (wood, cloth, paper). Class C involves electrical equipment. Class D involves combustible metals."
+  },
+  {
+    "q": "What does the acronym PASS stand for when using a fire extinguisher?",
+    "opts": [
+      "Position, Approach, Start, Spray",
+      "Pull the pin, Aim at the base, Squeeze the handle, Sweep from side to side",
+      "Point, Activate, Spray, Sweep",
+      "Prepare, Assess, Suppress, Secure"
+    ],
+    "ans": 1,
+    "exp": "PASS stands for: Pull the pin (standing 8 to 10 feet from the fire), Aim at the base of the fire (not the flames), Squeeze the handle to discharge, and Sweep the nozzle from side to side at the base of the fire."
+  },
+  {
+    "q": "Why should you aim a fire extinguisher at the BASE of the fire rather than the flames?",
+    "opts": [
+      "The flames are too hot for the extinguisher to reach effectively",
+      "Aiming at the base attacks the fuel source; aiming at the flames only disperses them without suppressing combustion",
+      "The base provides a larger target area",
+      "Regulations require aiming at the base for liability purposes"
+    ],
+    "ans": 1,
+    "exp": "Aiming at the base of the fire attacks the fuel source — the material that is burning. Aiming at the flames only disperses them without cutting off the fuel source, making suppression far less effective."
+  },
+  {
+    "q": "What is the first action when dealing with a cab or engine fire?",
+    "opts": [
+      "Open the hood immediately to assess the fire",
+      "Activate the vehicle's built-in fire suppression system",
+      "Turn off the vehicle's engine",
+      "Immediately apply the fire extinguisher through the windshield"
+    ],
+    "ans": 2,
+    "exp": "The first step in dealing with a cab or engine fire is to turn off the vehicle's engine. Do not open the hood immediately — introducing oxygen to a smoldering engine compartment fire can cause a dangerous flare-up. Use engine vents to apply the extinguisher if available."
+  },
+  {
+    "q": "What information must a motor carrier's accident register include?",
+    "opts": [
+      "Driver CDL number and drug test results",
+      "Date, location, driver name, number of injuries, number of fatalities, and whether hazmat other than fuel was released",
+      "Vehicle VIN, cargo weight, and insurance policy number",
+      "Date, distance from terminal, and estimated repair cost"
+    ],
+    "ans": 1,
+    "exp": "Per §390.15(b), the accident register must include: date of accident, location (city/town and state), driver name, number of injuries, number of fatalities, and whether hazardous materials other than fuel spilled from fuel tanks were released. Records must be kept for 3 years."
+  },
+  {
+    "q": "What should you do if a fire is too large or dangerous to fight with a portable extinguisher?",
+    "opts": [
+      "Attempt to suppress it using water from any available source",
+      "Apply the extinguisher from maximum safe distance and continue until empty",
+      "Get yourself and others safely away from the fire and leave it to professional emergency responders",
+      "Use multiple extinguishers simultaneously for greater effect"
+    ],
+    "ans": 1,
+    "exp": "If a fire is too large or dangerous to handle with a portable extinguisher, your priority is personal safety. Get yourself and any others away from the vehicle and the fire, and leave suppression to professional emergency responders. Never take unnecessary risks with a large fire."
+  }
+]
+
+// ============ ICONS ============
+const ICON_PLAY = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+// ============ STATE ============
+let currentSlide = 0;
+let narrationCollapsed = false;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+// Audio state — needed for pause/resume
+let audioTimerInterval = null;
+let estimatedDuration = 0;     // seconds — total expected for current narration
+let audioElapsed = 0;          // seconds — accumulated playback time
+let audioPlayStart = 0;        // ms — Date.now() at the moment current play segment started
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;       // <audio> element when USE_MP3 is true
+let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
+
+function saveCurrentState(){
+  Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
+function resetThisModule(){
+  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
+    Progress.resetModule(CURRENT_MODULE_SLUG);
+    window.location.reload();
+  }
+}
+
+// ── Active-time tracker ──────────────────────────────────────────────────────
+(function(){
+  let _start = Date.now(), _accum = 0;
+  function _flush(){
+    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
+    _accum = 0; _start = Date.now();
+    if(secs < 1) return;
+    const data = Progress._load();
+    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
+    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
+    Progress._save(data);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden'){ _flush(); }
+    else { _start = Date.now(); }
+  });
+  window.addEventListener('beforeunload', _flush);
+  setInterval(_flush, 30000);
+})();
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  const _saved = Progress.loadState(CURRENT_MODULE_SLUG);
+  if(_saved){
+    unlockStatus = (_saved.unlockStatus && _saved.unlockStatus.length === slides.length)
+      ? _saved.unlockStatus : new Array(slides.length).fill(false);
+    if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
+    else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
+  }
+  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 33'; }
+  buildDropdown();
+  buildTOC();
+  updateTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){
+      link.style.pointerEvents = 'none';
+      link.href = 'javascript:void(0)';
+    } else if(isCompleted || isUnlocked){
+      link.href = './' + m.file;
+    } else {
+      link.href = 'javascript:void(0)';
+      link.addEventListener('click', e => { e.preventDefault(); });
+    }
+    link.innerHTML = '<div class="dropdown-item-status"></div>' +
+      '<div class="di-text">' +
+      '<div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div>' +
+      '<div class="di-title">' + m.title + '</div>' +
+      '</div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 33 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => {
+    if(!wrap.contains(e.target)){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){
+  viewMode = 'slide';
+  renderSlide(0);
+}
+
+function renderMediaHTML(s){
+  if(!s.image && !s.video) return '';
+  let out = '<div class="slide-media">';
+  if(s.image){
+    const src = typeof s.image === 'string' ? s.image : s.image.src;
+    const cap = (typeof s.image === 'object' && s.image.caption) ? s.image.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<img class="slide-img" src="' + src + '" alt="' + (cap||'') + '" loading="lazy">'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  if(s.video){
+    const src = typeof s.video === 'string' ? s.video : s.video.src;
+    const poster = (typeof s.video === 'object' && s.video.poster) ? ' poster="' + s.video.poster + '"' : '';
+    const cap = (typeof s.video === 'object' && s.video.caption) ? s.video.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<div class="slide-video-wrap">'
+         + '<video class="slide-video" controls playsinline' + poster + '>'
+         + '<source src="' + src + '" type="video/mp4">'
+         + 'Your browser does not support video playback.</video>'
+         + '<button class="video-replay-btn" onclick="this.previousElementSibling.currentTime=0;this.previousElementSibling.play()">&#x21BA; Replay</button>'
+         + '</div>'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  out += '</div>';
+  return out;
+}
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  saveCurrentState();
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    ${renderMediaHTML(s)}
+    <div class="narration-box" id="narrationBox">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span><button class="narration-toggle" type="button" onclick="toggleNarration()" title="Hide/show narration text">▼</button></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-body">
+        <div class="narration-text">${s.narration}</div>
+        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+      </div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">← Previous</button>
+      <div class="lock-msg" id="lockMsg">🔒 Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check →' : 'Next →'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  if(narrationCollapsed){const b=document.getElementById('narrationBox');if(b)b.classList.add('collapsed');}
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0);
+  }
+}
+
+// ============ AUDIO PLAYBACK ============
+// Two modes: USE_MP3 (HTMLAudioElement, full pause/resume support) or
+// browser TTS (SpeechSynthesisUtterance — pause/resume is unreliable cross-browser,
+// so we approximate with cancel-and-restart-from-elapsed-position).
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  const _slideAudio = (slides[slideIdx] || {}).audioUrl || null;
+  if(_slideAudio || USE_MP3){
+    const file = _slideAudio || AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration){
+        currentAudio.currentTime = fromElapsedSeconds;
+      }
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){
+    onAudioComplete(false);
+    return;
+  }
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    const words = text.split(/\s+/);
+    textToSpeak = words.slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){
+    onAudioComplete(false);
+  }
+}
+
+function toggleNarration(){
+  narrationCollapsed=!narrationCollapsed;
+  const box=document.getElementById('narrationBox');
+  if(box) box.classList.toggle('collapsed');
+}
+function togglePlayPause(){
+  if(isComplete) return;
+  if(isPlaying){ pauseAudio(); } else { resumeAudio(); }
+}
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  if(audioPlayStart > 0){ audioElapsed += (Date.now() - audioPlayStart) / 1000; audioPlayStart = 0; }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){
+    currentAudio.pause();
+  } else if(window.speechSynthesis){
+    if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => { playTTS(currentNarrationText, audioElapsed); });
+  } else {
+    playTTS(currentNarrationText, audioElapsed);
+  }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){
+  const words = text.split(/\s+/).length;
+  return Math.max(8, (words / 155) * 60);
+}
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying){ return; }
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]){
+      onAudioComplete(false);
+    }
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true;
+  isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){
+    unlockStatus[currentSlide] = true;
+    saveCurrentState();
+  }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '✓ Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+  if(window.speechSynthesis){ window.speechSynthesis.cancel(); }
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false;
+  audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1){ renderSlide(currentSlide + 1); }
+  else { startQuiz(); }
+}
+
+function prevSlide(){ if(currentSlide > 0){ renderSlide(currentSlide - 1); } }
+
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+// ============ QUIZ ============
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '✓ Correct' : '✗ Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results →' : 'Next Question →') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else { showResults(); }
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){
+    Progress.markComplete(CURRENT_MODULE_SLUG, pct);
+    buildDropdown();
+  }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You\'ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You\'ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you\'ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="./' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
+              : '<a class="btn btn-next" href="./index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    const panel = document.getElementById('slidePanel');
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '✓ You answered correctly' : '✗ You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">← Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next →'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>
