@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ELDT NOW — MODULE TEMPLATE                                                  ║
+║  Copy this file, rename it to ELDT_X.X.X_TopicName.html, then:              ║
+║  1. Update the 6 HTML fields marked  ← CHANGE THIS  in the <head>/<body>    ║
+║  2. Set CURRENT_MODULE_SLUG  (line ~360)                                     ║
+║  3. Replace the slides[] array with the module content                       ║
+║  4. Replace the quizData[] array (exactly 15 questions)                      ║
+║  Nothing else needs to change — all CSS, JS, and boilerplate are shared.     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ① CHANGE: page title ─────────────────────────────────────────────────── -->
+<title>ELDT NOW · Module 21 · Handling and Documenting Cargo</title>
+<!-- ──────────────────────────────────────────────────────────────────────── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--blue-dark:#143d6b;--accent:#e8a020;--accent-dark:#b57a14;
+  --light:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#6b7a8d;
+  --success:#2e7d4f;--success-light:#e3f1e8;--danger:#c0392b;--danger-light:#fbeae8;
+  --border:#dce3ed;--shadow:0 2px 8px rgba(13,27,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--light);color:var(--text);line-height:1.55;font-size:16px;display:flex;flex-direction:column;min-height:100vh;}
+header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.logo{display:flex;align-items:baseline;gap:10px;font-family:'Barlow Condensed',sans-serif;text-decoration:none}
+.logo-mark{font-size:26px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase}
+
+.unit-dropdown{position:relative}
+.unit-trigger{font-family:'Barlow Condensed',sans-serif;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;border:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.module-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+.module-counter strong{color:var(--accent);font-weight:700}
+.unit-trigger:hover{background:rgba(255,255,255,.18)}
+.unit-trigger strong{color:var(--accent);margin-right:6px}
+.unit-trigger-caret{display:inline-block;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.unit-dropdown.open .unit-trigger-caret{transform:rotate(-135deg) translateY(2px)}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.25);min-width:420px;max-width:90vw;max-height:75vh;overflow-y:auto;display:none;z-index:200;border:1px solid var(--border)}
+.unit-dropdown.open .dropdown-menu{display:block}
+.dropdown-header{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+.dropdown-header-progress{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.dropdown-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;transition:background .12s;background:#fff}
+.dropdown-item:last-child{border-bottom:none}
+.dropdown-item:hover:not(.locked){background:var(--light)}
+.dropdown-item.current{background:#eef4fb;border-left:3px solid var(--blue);padding-left:13px}
+.dropdown-item.locked{cursor:not-allowed;color:var(--muted);background:#fafbfc}
+.dropdown-item.locked .di-num,.dropdown-item.locked .di-title{opacity:.6}
+.dropdown-item-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;background:var(--border);color:var(--muted)}
+.dropdown-item.completed .dropdown-item-status{background:var(--success);color:#fff}
+.dropdown-item.completed .dropdown-item-status::before{content:"✓"}
+.dropdown-item.current .dropdown-item-status{background:var(--accent);color:#fff}
+.dropdown-item.current .dropdown-item-status::before{content:"▶"}
+.dropdown-item.locked .dropdown-item-status::before{content:"🔒";font-size:11px}
+.dropdown-item.unlocked .dropdown-item-status{background:var(--blue);color:#fff}
+.dropdown-item.unlocked .dropdown-item-status::before{content:"○"}
+.di-text{flex:1;min-width:0}
+.di-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.di-title{font-size:14px;line-height:1.3;margin-top:1px}
+.dropdown-item.completed .di-title{color:var(--text)}
+.dropdown-footer{padding:12px 16px;text-align:center;border-top:1px solid var(--border);background:var(--light);position:sticky;bottom:0}
+.dropdown-footer a{color:var(--blue);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.dropdown-footer a:hover{text-decoration:underline}
+
+.progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:14px}
+.progress-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width .35s ease}
+.progress-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue);letter-spacing:.5px;min-width:90px;text-align:right}
+.course-body{flex:1;display:flex;gap:0;max-width:1400px;margin:0 auto;width:100%;padding:24px}
+.slide-panel{flex:1;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.sidebar{width:300px;margin-left:20px;background:var(--white);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 160px);position:sticky;top:120px}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:#fff;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.toc{overflow-y:auto;flex:1;padding:8px 0}
+.toc-section{padding:10px 18px 4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)}
+.toc-section:first-child{border-top:none}
+.toc-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.toc-item:hover:not(.locked){background:var(--light);color:var(--text)}
+.toc-item.active{background:var(--light);border-left-color:var(--blue);color:var(--navy);font-weight:600}
+.toc-item.completed{color:var(--text)}
+.toc-item.locked{cursor:not-allowed;opacity:.45}
+.toc-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;flex-shrink:0;background:#fff}
+.toc-item.completed .toc-check{background:var(--success);border-color:var(--success);color:#fff}
+.toc-item.completed .toc-check::before{content:"✓";font-weight:700}
+.toc-item.active .toc-check{border-color:var(--blue)}
+.toc-quiz{border-top:1px solid var(--border);padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:14px;color:var(--muted);cursor:not-allowed;display:flex;align-items:center;gap:10px}
+.toc-quiz.unlocked{color:var(--accent-dark);cursor:pointer}
+.toc-quiz.unlocked:hover{background:var(--light)}
+.toc-quiz .toc-check{border-color:var(--border)}
+.toc-quiz.unlocked .toc-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.toc-quiz.unlocked .toc-check::before{content:"★";font-size:11px}
+.toc-reset{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;text-align:left;transition:color .15s,background .15s}
+.toc-reset:hover{color:var(--danger);background:var(--light)}
+
+.welcome{padding:60px 50px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:600px}
+.welcome-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+.welcome h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.welcome-unit{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:rgba(255,255,255,.7);letter-spacing:2px;margin-bottom:36px}
+.welcome-obj{background:rgba(255,255,255,.08);border-radius:8px;padding:24px 30px;max-width:680px;text-align:left;margin-bottom:36px;border-left:4px solid var(--accent)}
+.welcome-obj h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--accent)}
+.welcome-obj ul{list-style:none}
+.welcome-obj li{padding:7px 0 7px 24px;position:relative;font-size:15px;line-height:1.5}
+.welcome-obj li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+.btn-start{font-family:'Barlow Condensed',sans-serif;background:var(--accent);color:var(--navy);border:none;padding:16px 44px;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+
+.slide-header{background:var(--blue);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.slide-section-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.75)}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;width:100%;line-height:1.15;margin-top:4px}
+.slide-content{padding:32px 40px;flex:1;overflow-y:auto;font-size:16px}
+.slide-content p{margin-bottom:14px}
+.slide-content p.emphasis{font-weight:600;color:var(--navy);font-size:17px;border-left:4px solid var(--accent);padding-left:14px;margin:18px 0;background:#fffdf6;padding:12px 16px;border-radius:0 6px 6px 0}
+.slide-content p.footnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+.slide-content ul,.slide-content ol{margin:8px 0 14px 24px}
+.slide-content ul li,.slide-content ol li{margin-bottom:6px;line-height:1.55}
+.slide-content ul ul,.slide-content ol ul{margin-top:6px;margin-bottom:6px}
+.slide-content ul.check-list{list-style:none;margin-left:0}
+.slide-content ul.check-list li{padding:6px 0 6px 30px;position:relative}
+.slide-content ul.check-list li::before{content:"✓";position:absolute;left:0;top:5px;color:var(--success);font-weight:700;font-size:16px}
+.callout{background:#eef4fb;border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:15px}
+.callout.warning{background:#fff4ec;border-left-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.class-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.class-letter{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1;background:var(--navy);color:var(--accent);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.class-desc{font-size:14px;color:var(--text);line-height:1.45}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+.col-card{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:18px}
+.col-card h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--blue);margin-bottom:8px}
+.col-card p{font-size:14px;margin:0;line-height:1.5}
+.formula-box{background:#0d1b2a;color:#fff;border-radius:8px;padding:20px;margin:18px 0}
+.formula{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-align:center;padding:10px 0;color:var(--accent);letter-spacing:1px}
+.formula-key{list-style:none;margin:14px 0 0 0!important;font-size:14px;color:rgba(255,255,255,.85)}
+.formula-key li{padding:4px 0 4px 20px;position:relative;line-height:1.5;margin:0!important}
+.formula-key li::before{content:"•";position:absolute;left:0;color:var(--accent)}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.data-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;font-size:13px;text-transform:uppercase}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td.ok{color:var(--success);font-weight:700}
+.data-table td.bad{color:var(--danger);font-weight:700}
+.slide-media{padding:0 40px 24px;display:flex;flex-direction:column;gap:18px}
+.slide-figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.slide-img{width:100%;max-height:480px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:#f7f9fb}
+.slide-video-wrap{position:relative;width:100%;background:#000;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.slide-video{width:100%;display:block;max-height:480px}
+.video-replay-btn{position:absolute;bottom:10px;right:10px;background:rgba(13,27,42,.75);color:#fff;border:none;padding:5px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.video-replay-btn:hover{background:var(--accent);color:#000}
+.slide-figure figcaption{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:0 8px}
+
+/* ---- Narration box with pause/play control ---- */
+.narration-box{margin:24px 40px;background:#fffaf0;border:1px solid #f5e3bb;border-radius:8px;padding:16px 20px}
+.narration-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.narration-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px}
+.narration-icon{width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.audio-control{display:flex;align-items:center;gap:8px}
+.audio-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:background .15s,transform .1s}
+.audio-btn:hover:not(:disabled){background:var(--accent-dark);transform:scale(1.05)}
+.audio-btn:active:not(:disabled){transform:scale(.95)}
+.audio-btn:disabled{background:var(--success);cursor:default;opacity:1}
+.audio-btn svg{width:12px;height:12px;fill:currentColor;display:block}
+.audio-btn-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;min-width:50px}
+.audio-btn-label.playing{color:var(--accent-dark)}
+.audio-btn-label.paused{color:var(--muted)}
+.audio-btn-label.done{color:var(--success)}
+.narration-text{font-size:14px;color:#3a3a3a;line-height:1.55;font-style:italic}
+.audio-progress{margin-top:12px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.audio-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .25s linear}
+.narration-toggle{width:22px;height:22px;border-radius:50%;background:transparent;border:1.5px solid var(--accent-dark);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;padding:0;flex-shrink:0;transition:transform .3s,background .15s;margin-left:8px;line-height:1}
+.narration-toggle:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.narration-box.collapsed .narration-toggle{transform:rotate(180deg)}
+.narration-box.collapsed .narration-header{margin-bottom:0}
+.narration-body{overflow:hidden;max-height:1200px;opacity:1;transition:max-height .35s ease,opacity .25s ease}
+.narration-box.collapsed .narration-body{max-height:0;opacity:0}
+
+.slide-nav{padding:20px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafbfd}
+.btn{font-family:'Barlow Condensed',sans-serif;padding:12px 28px;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-prev{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
+.btn-prev:hover:not(:disabled){background:var(--blue);color:#fff}
+.btn-next{background:var(--blue);color:#fff}
+.btn-next:hover:not(:disabled){background:var(--blue-dark)}
+.btn-next.locked{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.lock-msg{font-size:13px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+.lock-msg.unlocked{color:var(--success);font-weight:600;font-style:normal}
+
+.quiz-panel{padding:40px;flex:1;display:flex;flex-direction:column;min-height:600px}
+.quiz-header{margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.quiz-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;color:var(--navy);font-weight:700;letter-spacing:.5px}
+.quiz-subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+.quiz-counter{font-family:'Barlow Condensed',sans-serif;color:var(--blue);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:10px}
+.quiz-question{font-size:19px;font-weight:600;color:var(--navy);margin-bottom:24px;line-height:1.45}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.quiz-opt{background:#fff;border:2px solid var(--border);border-radius:8px;padding:14px 18px;cursor:pointer;font-size:15px;line-height:1.45;display:flex;gap:14px;transition:all .15s}
+.quiz-opt:hover:not(.disabled){border-color:var(--blue);background:#f5f8fc}
+.quiz-opt-letter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue);min-width:24px;background:var(--light);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quiz-opt.correct{border-color:var(--success);background:var(--success-light)}
+.quiz-opt.correct .quiz-opt-letter{background:var(--success);color:#fff}
+.quiz-opt.wrong{border-color:var(--danger);background:var(--danger-light)}
+.quiz-opt.wrong .quiz-opt-letter{background:var(--danger);color:#fff}
+.quiz-opt.disabled{cursor:default}
+.quiz-feedback{padding:16px 20px;border-radius:8px;font-size:14px;line-height:1.55;margin-bottom:20px;display:none}
+.quiz-feedback.correct{background:var(--success-light);border-left:4px solid var(--success);color:#1b4a30;display:block}
+.quiz-feedback.wrong{background:var(--danger-light);border-left:4px solid var(--danger);color:#5c1f17;display:block}
+.quiz-feedback-label{font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+.quiz-nav{margin-top:auto;display:flex;justify-content:flex-end;padding-top:20px;border-top:1px solid var(--border);gap:12px}
+
+.results{padding:50px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:600px}
+.results-score-ring{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--success) 0deg,var(--success) var(--score-deg,0deg),var(--border) var(--score-deg,0deg));display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative}
+.results-score-ring.fail{background:conic-gradient(var(--danger) 0deg,var(--danger) var(--score-deg,0deg),var(--border) var(--score-deg,0deg))}
+.results-score-inner{width:140px;height:140px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.results-score-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--navy);line-height:1}
+.results-score-label{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.results-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px}
+.results-title.pass{color:var(--success)}
+.results-title.fail{color:var(--danger)}
+.results-message{color:var(--muted);max-width:480px;line-height:1.55;margin-bottom:28px;font-size:15px}
+.results-breakdown{display:flex;gap:24px;margin-bottom:32px}
+.results-stat{text-align:center}
+.results-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--navy)}
+.results-stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.results-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+@media (max-width:900px){
+  .course-body{flex-direction:column;padding:12px}
+  .sidebar{width:100%;margin-left:0;margin-top:14px;position:static;max-height:none}
+  .welcome{padding:40px 24px}
+  .welcome h1{font-size:36px}
+  .slide-title{font-size:24px}
+  .slide-content{padding:22px 24px}
+  .narration-box{margin:16px 24px}
+  .slide-nav{padding:16px 24px}
+  .slide-media{padding:0 24px 20px}
+  .quiz-panel,.results{padding:24px}
+  .dropdown-menu{min-width:300px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Entry-Level Driver Training</span>
+  </a>
+  <div class="unit-dropdown" id="unitDropdown">
+    <button class="unit-trigger" id="unitTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <!-- ② CHANGE: unit number and module title in the header nav trigger ── -->
+      <span><strong>UNIT 1.5.1</strong> Handling and Documenting Cargo</span>
+      <!-- ──────────────────────────────────────────────────────────────────── -->
+      <span class="unit-trigger-caret"></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" role="menu">
+      <div class="dropdown-header">
+        <span>All 33 Modules</span>
+        <span class="dropdown-header-progress" id="dropdownHeaderProgress">0 of 33 complete</span>
+      </div>
+      <div id="dropdownItems"></div>
+      <div class="dropdown-footer"><a href="./index.html">← Back to Course Home</a></div>
+    </div>
+  </div>
+  <span class="module-counter" id="moduleCounter"></span>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0% Complete</div>
+</div>
+
+<div class="course-body">
+  <div class="slide-panel" id="slidePanel">
+    <div class="welcome" id="welcomeView">
+      <!-- ③ CHANGE: welcome screen — eyebrow, h1, subtitle, objectives ────── -->
+      <div class="welcome-eyebrow">Module 21 · Unit 1.5.1</div>
+      <h1>Handling and Documenting Cargo</h1>
+      <div class="welcome-unit">Secure it. Document it. Deliver it safely.</div>
+      <div class="welcome-obj">
+        <h3>What You'll Learn</h3>
+        <ul>
+          <li>Identify common cargo securement devices: tiedowns, blocking, bracing, dunnage, and friction mats</li>
+          <li>Apply weight distribution principles to keep the center of gravity low</li>
+          <li>Follow safe loading and unloading procedures</li>
+          <li>Describe the three functions of a bill of lading and what it must contain</li>
+          <li>Complete correct pickup and delivery procedures and apply cargo theft prevention</li>
+        </ul>
+      </div>
+      <!-- ──────────────────────────────────────────────────────────────────── -->
+      <button class="btn-start" onclick="startCourse()">Begin Course</button>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Course Outline</div>
+    <div class="toc" id="toc"></div>
+    <div class="toc-quiz" id="tocQuiz" onclick="tryStartQuiz()">
+      <div class="toc-check"></div>
+      <span>Knowledge Check</span>
+    </div>
+    <button class="toc-reset" onclick="resetThisModule()">↺ Reset This Module</button>
+  </aside>
+</div>
+
+<script>
+// ============ CONFIG ============
+// ── AUDIO CONFIGURATION ─────────────────────────────────────────────────────
+// To activate ElevenLabs (or any MP3) professional narration, two options:
+//
+// OPTION A — Module-wide MP3: set USE_MP3 = true and place audio files in the
+//   audio/ folder named slide_00.mp3, slide_01.mp3 … (zero-padded slide index).
+//   Falls back to browser TTS automatically if any file fails to load.
+//
+// OPTION B — Per-slide URL: add  "audioUrl": "https://…"  to any slide object
+//   in the slides array below. That slide plays its specific URL; the rest use
+//   the USE_MP3 setting. Ideal for individual ElevenLabs audio clips.
+//
+// IMAGES: add  "image": "path/to/image.jpg"  (or {src, caption}) to any slide.
+// VIDEOS: add  "video": "path/to/clip.mp4"   (or {src, poster, caption}) to any slide.
+// ─────────────────────────────────────────────────────────────────────────────
+const USE_MP3 = false;           // ← set true to use MP3 files for all slides
+const AUDIO_BASE_PATH = './audio/'; // ← folder for slide_00.mp3, slide_01.mp3 …
+const NARRATION_RATE = 0.95;
+
+// ============ CROSS-MODULE PROGRESS SYSTEM ============
+// Tracks completion of all 33 modules. Currently localStorage-based.
+// To migrate to a backend account system later, replace the four method
+// bodies below with API calls. The rest of the application code does not
+// need to change.
+const Progress = {
+  KEY: 'eldtnow_progress',
+  _load(){ try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e){ return {}; } },
+  _save(data){ try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch(e){} },
+  get(slug){ return this._load()[slug] || { completed:false, quizScore:0 }; },
+  getAll(){ return this._load(); },
+  markComplete(slug, score){
+    const data = this._load();
+    data[slug] = { ...(data[slug] || {}), completed: true, quizScore: score, completedAt: new Date().toISOString() };
+    this._save(data);
+  },
+  markStarted(slug){
+    const data = this._load();
+    if(!data[slug]) data[slug] = {};
+    if(!data[slug].startedAt) data[slug].startedAt = new Date().toISOString();
+    this._save(data);
+  },
+  isUnlocked(slug, registry){
+    const data = this._load();
+    const idx = registry.findIndex(m => m.slug === slug);
+    if(idx === -1) return false;
+    if(idx === 0) return true;
+    for(let i = 0; i < idx; i++){
+      if(!data[registry[i].slug] || !data[registry[i].slug].completed) return false;
+    }
+    return true;
+  },
+  saveState(slug, state){ try { localStorage.setItem(this.KEY + '_state_' + slug, JSON.stringify(state)); } catch(e){} },
+  loadState(slug){ try { return JSON.parse(localStorage.getItem(this.KEY + '_state_' + slug) || 'null'); } catch(e){ return null; } },
+  resetModule(slug){
+    const data = this._load();
+    delete data[slug];
+    this._save(data);
+    try { localStorage.removeItem(this.KEY + '_state_' + slug); } catch(e){}
+  }
+};
+
+// ============ MODULE-LEVEL DATA ============
+// REGISTRY — master list of all 33 modules. This is identical across every module.
+// Update status from "pending" to "built" once a module file is ready.
+const REGISTRY = [{"num":1,"slug":"orientation","unit":"1.1.1","title":"Orientation","file":"ELDT_1.1.1_Orientation.html","group":"A1.1 — Basic Operation","status":"built"},{"num":2,"slug":"control-systems-dashboard","unit":"1.1.2","title":"Control Systems/Dashboard","file":"ELDT_1.1.2_ControlSystemsDashboard.html","group":"A1.1 — Basic Operation","status":"built"},{"num":3,"slug":"pretrip-posttrip-inspections","unit":"1.1.3","title":"Pre- and Post-Trip Inspections","file":"ELDT_1.1.3_PrePostTripInspections.html","group":"A1.1 — Basic Operation","status":"built"},{"num":4,"slug":"basic-control","unit":"1.1.4","title":"Basic Control","file":"ELDT_1.1.4_BasicControl.html","group":"A1.1 — Basic Operation","status":"built"},{"num":5,"slug":"shifting-operating-transmissions","unit":"1.1.5","title":"Shifting/Operating Transmissions","file":"ELDT_1.1.5_ShiftingOperatingTransmissions.html","group":"A1.1 — Basic Operation","status":"built"},{"num":6,"slug":"backing-and-docking","unit":"1.1.6","title":"Backing and Docking","file":"ELDT_1.1.6_BackingAndDocking.html","group":"A1.1 — Basic Operation","status":"built"},{"num":7,"slug":"coupling-and-uncoupling","unit":"1.1.7","title":"Coupling and Uncoupling","file":"ELDT_1.1.7_CouplingAndUncoupling.html","group":"A1.1 — Basic Operation","status":"built"},{"num":8,"slug":"visual-search","unit":"1.2.1","title":"Visual Search","file":"ELDT_1.2.1_VisualSearch.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":9,"slug":"communication","unit":"1.2.2","title":"Communication","file":"ELDT_1.2.2_Communication.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":10,"slug":"distracted-driving","unit":"1.2.3","title":"Distracted Driving","file":"ELDT_1.2.3_DistractedDriving.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":11,"slug":"speed-management","unit":"1.2.4","title":"Speed Management","file":"ELDT_1.2.4_SpeedManagement.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":12,"slug":"space-management","unit":"1.2.5","title":"Space Management","file":"ELDT_1.2.5_SpaceManagement.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":13,"slug":"night-operation","unit":"1.2.6","title":"Night Operation","file":"ELDT_1.2.6_NightOperation.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":14,"slug":"extreme-driving-conditions","unit":"1.2.7","title":"Extreme Driving Conditions","file":"ELDT_1.2.7_ExtremeDrivingConditions.html","group":"A1.2 — Safe Operating Procedures","status":"built"},{"num":15,"slug":"hazard-perception","unit":"1.3.1","title":"Hazard Perception","file":"ELDT_1.3.1_HazardPerception.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":16,"slug":"skid-control-recovery","unit":"1.3.2","title":"Skid Control and Recovery","file":"ELDT_1.3.2_SkidControlRecovery.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":17,"slug":"railroad-highway-grade-crossings","unit":"1.3.3","title":"Railroad-Highway Grade Crossings","file":"ELDT_1.3.3_RailroadHighwayGradeCrossings.html","group":"A1.3 — Advanced Operating Practices","status":"built"},{"num":18,"slug":"identification-diagnosis-malfunctions","unit":"1.4.1","title":"Identification and Diagnosis of Malfunctions","file":"ELDT_1.4.1_IdentificationDiagnosisMalfunctions.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":19,"slug":"roadside-inspections","unit":"1.4.2","title":"Roadside Inspections","file":"ELDT_1.4.2_RoadsideInspections.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":20,"slug":"maintenance","unit":"1.4.3","title":"Maintenance","file":"ELDT_1.4.3_Maintenance.html","group":"A1.4 — Vehicle Systems and Reporting","status":"built"},{"num":21,"slug":"handling-documenting-cargo","unit":"1.5.1","title":"Handling and Documenting Cargo","file":"ELDT_1.5.1_HandlingDocumentingCargo.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":22,"slug":"environmental-compliance","unit":"1.5.2","title":"Environmental Compliance Issues","file":"ELDT_1.5.2_EnvironmentalComplianceIssues.html","group":"A1.5 — Transporting Cargo","status":"built"},{"num":23,"slug":"module-23","unit":"1.5.3","title":"Module 23 Title","file":"ELDT_1.5.3_Module23.html","group":"A1.5 — Transporting Cargo","status":"pending"},{"num":24,"slug":"module-24","unit":"1.5.4","title":"Module 24 Title","file":"ELDT_1.5.4_Module24.html","group":"A1.5 — Transporting Cargo","status":"pending"},{"num":25,"slug":"module-25","unit":"1.6.1","title":"Module 25 Title","file":"ELDT_1.6.1_Module25.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":26,"slug":"module-26","unit":"1.6.2","title":"Module 26 Title","file":"ELDT_1.6.2_Module26.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":27,"slug":"module-27","unit":"1.6.3","title":"Module 27 Title","file":"ELDT_1.6.3_Module27.html","group":"A1.6 — Hours of Service","status":"pending"},{"num":28,"slug":"module-28","unit":"1.7.1","title":"Module 28 Title","file":"ELDT_1.7.1_Module28.html","group":"A1.7 — Accident Procedures","status":"pending"},{"num":29,"slug":"module-29","unit":"1.7.2","title":"Module 29 Title","file":"ELDT_1.7.2_Module29.html","group":"A1.7 — Accident Procedures","status":"pending"},{"num":30,"slug":"module-30","unit":"1.8.1","title":"Module 30 Title","file":"ELDT_1.8.1_Module30.html","group":"A1.8 — Wellness","status":"pending"},{"num":31,"slug":"module-31","unit":"1.8.2","title":"Module 31 Title","file":"ELDT_1.8.2_Module31.html","group":"A1.8 — Wellness","status":"pending"},{"num":32,"slug":"module-32","unit":"1.9.1","title":"Module 32 Title","file":"ELDT_1.9.1_Module32.html","group":"A1.9 — Whistleblower","status":"pending"},{"num":33,"slug":"module-33","unit":"1.9.2","title":"Module 33 Title","file":"ELDT_1.9.2_Module33.html","group":"A1.9 — Whistleblower","status":"pending"}];
+
+// ④ CHANGE: slug must match this module's "slug" value in the REGISTRY above ─
+const CURRENT_MODULE_SLUG = 'handling-documenting-cargo';
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── SLIDE DATA ───────────────────────────────────────────────────────────────
+// Each slide object supports these optional fields beyond section/title/contentHTML/narration:
+//   audioUrl : string  — per-slide ElevenLabs or MP3 URL (overrides USE_MP3 for this slide)
+//              e.g.  "audioUrl": "https://api.elevenlabs.io/v1/text-to-speech/…"
+//              or    "audioUrl": "./audio/slide_00.mp3"
+//   image    : string | {src, caption}  — image displayed below slide content
+//              e.g.  "image": "images/stopping-distance.jpg"
+//              or    "image": {"src": "images/diagram.jpg", "caption": "Figure 1"}
+//   video    : string | {src, poster, caption}  — video clip displayed below content
+//              e.g.  "video": "video/brake-demo.mp4"
+//              or    "video": {"src": "video/clip.mp4", "poster": "thumb.jpg", "caption": "Demo"}
+// ─────────────────────────────────────────────────────────────────────────────
+// ⑤ CHANGE: replace ALL slide objects below with this module's content ────────
+//
+// SLIDE OBJECT SHAPE:
+// {
+//   "section":      "section-id",          // groups slides in the TOC sidebar
+//   "sectionLabel": "Section Display Name", // shown as the TOC group header
+//   "title":        "Slide Title",          // shown in the blue slide header bar
+//   "contentHTML":  "<p>…</p>",            // main body HTML (see CSS classes below)
+//   "narration":    "Full narration text.", // read aloud / shown as narration text
+//
+//   // OPTIONAL — leave these out if not needed:
+//   "audioUrl":  "https://…",             // ElevenLabs URL for this slide only
+//   "image":     "images/file.jpg",        // or {"src":"…","caption":"…"}
+//   "video":     "video/file.mp4"          // or {"src":"…","poster":"…","caption":"…"}
+// }
+//
+// AVAILABLE contentHTML CSS CLASSES:
+//   <p class="emphasis">          — highlighted callout paragraph (gold left border)
+//   <p class="footnote">          — small grey italic footnote
+//   <ul class="check-list">       — bulleted list with green checkmarks
+//   <div class="callout">         — blue info box
+//   <div class="callout warning"> — orange warning box
+//   <div class="stat-grid">       — responsive grid of stat-card divs
+//     <div class="stat-card"><div class="stat-num">70%</div><div class="stat-label">label</div></div>
+//   <div class="two-col">         — responsive two-column card layout
+//     <div class="col-card"><h4>Title</h4><p>Body text</p></div>
+//   <div class="class-grid">      — CDL class card grid (class-letter + class-desc)
+//   <div class="formula-box">     — dark formula display box
+//     <div class="formula">W = 500 × …</div>
+//     <ul class="formula-key"><li><strong>W</strong> = …</li></ul>
+//   <table class="data-table">   — styled data table with <th>, <td class="ok">, <td class="bad">
+// ─────────────────────────────────────────────────────────────────────────────
+const slides = [
+  {
+    "section": "intro",
+    "sectionLabel": "Introduction",
+    "title": "Cargo Handling: Your Responsibility From Loading to Delivery",
+    "contentHTML": "<ul>\n      <li>Your job: transport cargo <strong>safely, on time, and damage-free</strong></li>\n      <li>Responsibility begins when cargo is loaded and ends when it is signed for at delivery</li>\n      <li>Applies to federal, state, and local regulations for every area you travel through</li>\n      <li>This module covers: securement devices, weight distribution, loading/unloading, bills of lading, pickup and delivery procedures, and cargo theft prevention</li>\n    </ul>",
+    "narration": "As a professional driver, your job is to transport cargo safely, on time, and damage-free. That responsibility begins the moment cargo is loaded onto your vehicle and does not end until it is signed for at the destination. This module covers everything from securement devices and weight distribution to the bill of lading, pickup and delivery procedures, and how to protect your cargo from theft."
+  },
+  {
+    "section": "intro",
+    "sectionLabel": "Introduction",
+    "title": "Learning Objectives",
+    "contentHTML": "<p>By the end of this module, you will be able to:</p><ul>\n      <li>Recognize common cargo securement devices</li>\n      <li>Explain how to evenly distribute cargo weight</li>\n      <li>Identify how to safely load and unload your vehicle</li>\n      <li>Recall the functions and required content of a bill of lading</li>\n      <li>Summarize pickup and delivery procedures</li>\n      <li>Practice cargo theft prevention measures</li>\n    </ul>",
+    "narration": "By the end of this module you'll be able to identify common securement devices and know how to use them, understand weight distribution principles, know the rules for loading and unloading, understand what a bill of lading is and what it must contain, follow the correct procedures at pickup and delivery, and apply practices that protect your cargo from theft."
+  },
+  {
+    "section": "securement",
+    "sectionLabel": "Cargo Securement",
+    "title": "Securement Devices",
+    "contentHTML": "<p><strong>§393.13 of the FMCSRs</strong> requires drivers to know how to properly locate, distribute, and secure cargo.</p>\n    <p><strong>Tiedown devices:</strong></p>\n    <ul>\n      <li><strong>Tiedowns</strong> (straps, chains, ropes) — attach cargo to anchor points; cargo must be in direct contact or prevented from shifting toward each other</li>\n      <li><strong>Chains</strong> — heavy-duty; for steel, machinery, and dense loads</li>\n      <li><strong>Straps</strong> — flexible and widely used</li>\n      <li><strong>Ropes</strong> — for lighter loads; must be properly tensioned</li>\n    </ul>\n    <p><strong>Other devices:</strong></p>\n    <ul>\n      <li><strong>Blocking</strong> — wood blocks snugly against cargo; nails must penetrate at least <strong>1.25 inches</strong> into the deck</li>\n      <li><strong>Bracing</strong> — materials bearing against cargo to prevent movement</li>\n      <li><strong>Dunnage</strong> — filler material placed between cargo items</li>\n      <li><strong>Friction mats</strong> — increase grip between cargo and deck</li>\n      <li><strong>Load bars / logistic straps</strong> — brace cargo against trailer walls</li>\n      <li><strong>Edge protection</strong> — prevents tiedowns from cutting into cargo corners</li>\n      <li><strong>Tarps</strong> — protect cargo from weather and road debris</li>\n    </ul>",
+    "narration": "Section 393.13 of the FMCSRs requires you to know how to properly locate, distribute, and secure cargo. Tiedowns are the most common securement method — they combine straps, chains, or ropes to attach cargo to anchor points on the trailer. Cargo must either be in direct contact with adjacent pieces or be prevented from shifting toward each other. Chains are heavy-duty and used for steel and machinery. Straps are flexible and widely used. Ropes work for lighter loads. Beyond tiedowns: blocking uses wood blocks against cargo — nails must penetrate at least 1.25 inches into the deck. Bracing bears against the cargo to prevent movement. Dunnage fills gaps between items. Friction mats increase grip between the cargo and the deck. Load bars and logistic straps brace cargo against trailer walls. Edge protection prevents tiedown damage to cargo corners. Tarps protect from weather and debris."
+  },
+  {
+    "section": "weight",
+    "sectionLabel": "Weight and Loading",
+    "title": "Weight Distribution and Safe Loading",
+    "contentHTML": "<p><strong>Why weight distribution matters:</strong></p>\n    <ul>\n      <li>Improper loading affects steering and handling, increases stopping distance, and decreases turning ability</li>\n      <li>Overloading causes excess brake and suspension wear and can result in fines</li>\n    </ul>\n    <p><strong>Principles of proper distribution:</strong></p>\n    <ul>\n      <li>Distribute weight evenly — front to back and side to side</li>\n      <li>Keep the center of gravity as <strong>low as possible</strong> — heaviest cargo on the bottom, lightest on top</li>\n      <li>A high center of gravity dramatically increases rollover risk in curves and swerving situations</li>\n    </ul>\n    <p><strong>Safe loading rules:</strong></p>\n    <ul>\n      <li>Never go near or under a suspended load</li>\n      <li>Stay on the same side of the trailer as the loading machine</li>\n      <li>Remain within the loading machine operator's field of vision at all times</li>\n      <li>Set the parking brake and chock wheels when loading or unloading independently</li>\n    </ul>",
+    "narration": "How cargo is loaded directly affects vehicle performance and safety. Improper weight distribution can make the vehicle harder to steer and handle, increase stopping distance, and reduce turning ability. Distribute weight evenly front to back and side to side. Keep the center of gravity as low as possible — heaviest cargo on the bottom, lightest on top. A high center of gravity dramatically increases rollover risk in curves and during swerving maneuvers. When you're involved in loading: never go near or under a suspended load, stay on the same side of the trailer as the loading machine, remain within the operator's field of vision, and set the parking brake and chock the wheels when loading independently."
+  },
+  {
+    "section": "docs",
+    "sectionLabel": "Documentation",
+    "title": "The Bill of Lading: Three Functions",
+    "contentHTML": "<p>The <strong>bill of lading</strong> is the primary document between a shipper and a common carrier. It serves three distinct functions:</p>\n    <div class=\"two-col\">\n      <div class=\"col-card\"><h4>1 — Receipt</h4><p>Issued by the carrier to the shipper confirming that goods have been received for transportation in good order.</p></div>\n      <div class=\"col-card\"><h4>2 — Contract of Carriage</h4><p>A legal contract binding the carrier to transport the freight under specific terms and conditions.</p></div>\n      <div class=\"col-card\"><h4>3 — Document of Title</h4><p>In some cases, proves ownership of the freight and may be used to transfer ownership to another party.</p></div>\n    </div>\n    <p><strong>What a bill of lading must contain:</strong></p>\n    <ul>\n      <li>Shipper name and address (consignor); Receiver name and address (consignee)</li>\n      <li>Description of freight: commodity, quantity, weight</li>\n      <li>Special handling instructions</li>\n      <li>For hazmat: proper shipping name, hazard class, ID number, packing group, and quantity</li>\n    </ul>\n    <p class=\"emphasis\">When you sign the bill of lading, you are acting as your carrier's legal agent — binding the company to the contract.</p>",
+    "narration": "The bill of lading serves three functions. First, it is a receipt: the carrier issues it to the shipper confirming the goods were received in good order. Second, it is a contract of carriage binding the carrier to transport the freight under specific terms. Third, it can be a document of title, proving ownership of the freight. It must contain the shipper's and receiver's names and addresses, a description of the freight including commodity, quantity, and weight, and special handling instructions. For hazardous materials, it must also include the proper shipping name, hazard class, UN or NA ID number, packing group, and quantity. When you sign the bill of lading, you are legally acting as your carrier's agent."
+  },
+  {
+    "section": "docs",
+    "sectionLabel": "Documentation",
+    "title": "Hazmat Shipping Papers and Accessibility",
+    "contentHTML": "<p>Hazmat shipping papers provide critical information used by <strong>emergency responders at accident scenes</strong>.</p>\n    <p><strong>Required content:</strong> proper shipping name, hazard class, UN/NA ID number, packing group, quantity, and emergency contact</p>\n    <p><strong>Accessibility requirements:</strong></p>\n    <ul>\n      <li>Must be <strong>clearly distinguishable</strong> from other papers — tab it or place it on top</li>\n      <li><strong>While driving:</strong> within immediate reach, restrained by seatbelt or visible to anyone entering the cab; or in a holder on the inside of the driver's door</li>\n      <li><strong>When out of the vehicle:</strong> on the driver's seat or in the door holder</li>\n    </ul>\n    <div class=\"callout warning\">Emergency responders must be able to find the shipping paper instantly. Make it easy to locate — every time.</div>",
+    "narration": "When transporting hazardous materials, the shipping paper is a critical safety document. Emergency responders use it at an accident scene to determine what materials are involved and what response is required. While driving, hazmat shipping papers must be within immediate reach — in hand, restrained by the seatbelt, or in a holder on the inside of the driver's door. When out of the vehicle, they must be on the driver's seat or in the door holder. The paper must be clearly distinguished from all other documents so anyone entering the cab can find it immediately."
+  },
+  {
+    "section": "pickup",
+    "sectionLabel": "Pickup and Delivery",
+    "title": "Pickup and Delivery Procedures",
+    "contentHTML": "<p><strong>At pickup:</strong></p>\n    <ul>\n      <li>Show photo ID; shipper may ask for receiver name and destination before releasing cargo</li>\n      <li>Only accept <strong>scheduled cargo</strong> — treat any unauthorized freight request as suspicious</li>\n      <li>Check each piece against the bill of lading; verify the count before signing</li>\n      <li>Document trailer seal numbers; freight is your responsibility from the moment you sign</li>\n    </ul>\n    <p><strong>At delivery:</strong></p>\n    <ul>\n      <li>Deliver to the correct person; match all paperwork; inspect and break seals in the receiver's presence</li>\n      <li>Get proper signatures on the bill of lading — <strong>freight is yours until the consignee signs</strong></li>\n      <li>Document any shortages, damage, or discrepancies per your carrier's policy</li>\n    </ul>\n    <p><strong>Split shipments</strong> (cargo from more than one address): obtain a receipted bill of lading at each pickup address and verify every piece carefully.</p>",
+    "narration": "At pickup, show your photo ID. Only accept the scheduled cargo — treat any request to load unscheduled or unauthorized freight as suspicious. Check each piece against the bill of lading. When you sign, you are legally acting as your carrier's agent. Document trailer seal numbers — the freight is yours from that point forward. At delivery, confirm you are delivering to the correct person. Match all paperwork, inspect seals, break them in the presence of the receiver, and get the proper signatures. The freight remains your responsibility until the consignee signs for it. For split shipments, obtain a receipted bill of lading at each pickup address."
+  },
+  {
+    "section": "theft",
+    "sectionLabel": "Cargo Theft Prevention",
+    "title": "Cargo Theft Prevention",
+    "contentHTML": "<p><strong>At the shipper:</strong></p>\n    <ul>\n      <li>Pre-communicate: carrier and shipper should both know the driver name, vehicle, and trailer number</li>\n      <li>Verify the count before signing — theft often starts at the dock as \"intentional shorts\"</li>\n    </ul>\n    <p><strong>On the road:</strong></p>\n    <ul>\n      <li>Many hijackings occur within a few miles of the load's origin — be alert immediately after leaving</li>\n      <li>Keep doors locked and windows up; follow your carrier's check-in communication requirements</li>\n      <li>Be alert at prime hijack locations: signal-controlled intersections, railroad crossings, on- and off-ramps</li>\n      <li>If you suspect you are being followed: contact law enforcement and your carrier immediately</li>\n    </ul>\n    <p><strong>While parked:</strong></p>\n    <ul>\n      <li>Park at reputable, well-lit, high-traffic truck stops; back the trailer against a wall, fence, or another trailer to block door access</li>\n      <li>Never park at abandoned locations; never stop for strangers asking you to pull over</li>\n      <li>Use trailer seals: <strong>indicative</strong> (tamper-evident, one-time use) and <strong>barrier</strong> (heavy-duty, harder to breach)</li>\n    </ul>",
+    "narration": "Cargo theft is a real and costly problem. Before pickup, the carrier and shipper should both know who is picking up the load. Count carefully at the dock and verify before you sign. Many hijackings happen within a few miles of the load's origin — be alert from the moment you leave. Keep doors locked. Be especially cautious at signal-controlled intersections, railroad crossings, and on- and off-ramps. If you think you're being followed, call law enforcement and your carrier immediately. When you park, choose reputable, well-lit truck stops. Back the trailer against a wall, fence, or another trailer to block door access. Never accept a stranger's request to stop. Trailer seals deter and detect unauthorized access."
+  },
+  {
+    "section": "wrapup",
+    "sectionLabel": "Wrap-Up",
+    "title": "What You've Covered",
+    "contentHTML": "<p>You should now be able to:</p>\n    <ul class=\"check-list\">\n      <li>Identify common cargo securement devices: tiedowns, blocking (nails ≥ 1.25\"), bracing, dunnage, and friction mats</li>\n      <li>Apply weight distribution principles: even weight front-to-back, heaviest cargo on the bottom</li>\n      <li>Follow safe loading and unloading procedures</li>\n      <li>Describe the three functions of a bill of lading and what it must contain</li>\n      <li>Complete correct pickup and delivery procedures, including documentation and signature requirements</li>\n      <li>Apply cargo theft prevention practices at the shipper, on the road, and while parked</li>\n    </ul>\n    <p class=\"emphasis\">Up next: the Knowledge Check. You need 80% to pass this module and unlock Module 22.</p>",
+    "narration": "That wraps up Module 21. You now understand how to select and apply the right cargo securement devices, distribute weight properly, load and unload safely, what the bill of lading is and what it contains, the correct procedures at pickup and delivery, and the security practices that protect your cargo from theft. Up next is the Knowledge Check. Score 80 percent or higher to pass and unlock Module 22."
+  }
+]
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ⑥ CHANGE: replace with this module's 15 quiz questions ─────────────────────
+//
+// QUIZ OBJECT SHAPE:
+// {
+//   "q":    "Question text?",
+//   "opts": ["Option A", "Option B", "Option C", "Option D"],
+//   "ans":  0,   // zero-based index of the CORRECT option (0=A, 1=B, 2=C, 3=D)
+//   "exp":  "Explanation shown after answering — explain WHY the correct answer is right."
+// }
+// Always exactly 15 questions. Pass threshold is 80% = 12 of 15 correct.
+// ─────────────────────────────────────────────────────────────────────────────
+const quizData = [
+  {
+    "q": "What federal regulation requires drivers to know how to properly locate, distribute, and secure cargo?",
+    "opts": [
+      "§392.9",
+      "§393.13",
+      "§396.3",
+      "§391.13"
+    ],
+    "ans": 1,
+    "exp": "Section 393.13 of the FMCSRs requires that drivers know how to properly locate, distribute, and secure cargo on their vehicle."
+  },
+  {
+    "q": "What is a tiedown?",
+    "opts": [
+      "A single strap used exclusively for flatbed loads",
+      "A combination of securing devices forming an assembly to attach or restrain cargo, attached to anchor points on the vehicle",
+      "A type of blocking used only on dry van trailers",
+      "A device used to lock trailer doors against unauthorized access"
+    ],
+    "ans": 1,
+    "exp": "A tiedown is a combination of securing devices — straps, chains, or ropes — that form an assembly to attach or restrain cargo on a vehicle, attached to anchor points."
+  },
+  {
+    "q": "When using blocking as a securement method, how far must nails penetrate into the trailer deck?",
+    "opts": [
+      "At least 0.5 inch",
+      "At least 0.75 inch",
+      "At least 1.25 inches",
+      "At least 2 inches"
+    ],
+    "ans": 2,
+    "exp": "When using blocking, nails must penetrate at least 1.25 inches into the trailer deck to ensure the blocking is firmly secured and capable of withstanding transport forces."
+  },
+  {
+    "q": "What effect does improper weight distribution have on vehicle performance?",
+    "opts": [
+      "It improves fuel economy by reducing aerodynamic drag",
+      "It affects steering and handling, increases stopping distance, and decreases turning ability",
+      "It only affects the vehicle during turns, not during straight-line driving",
+      "It has no measurable effect if total weight is within legal limits"
+    ],
+    "ans": 1,
+    "exp": "Improper weight distribution affects steering and handling, increases braking distance, decreases turning ability, and increases the risk of rollover — regardless of whether the total weight is legal."
+  },
+  {
+    "q": "Where should the heaviest cargo be placed when loading a trailer?",
+    "opts": [
+      "On top, to minimize stress on the trailer floor",
+      "At the rear of the trailer, nearest the doors",
+      "On the bottom, keeping the center of gravity as low as possible",
+      "Evenly split between the front and rear upper portions"
+    ],
+    "ans": 2,
+    "exp": "Heaviest cargo should go on the bottom of the load, keeping the center of gravity as low as possible and significantly reducing rollover risk in curves and evasive maneuvers."
+  },
+  {
+    "q": "What are the three distinct functions of a bill of lading?",
+    "opts": [
+      "Weight certificate, delivery receipt, and insurance document",
+      "Receipt from carrier to shipper, contract of carriage, and document of title",
+      "Cargo inspection form, tax document, and customs declaration",
+      "Fuel log, cargo manifest, and driver log"
+    ],
+    "ans": 1,
+    "exp": "The bill of lading serves as a receipt confirming goods were received, a contract of carriage defining the terms of transport, and a document of title that may prove or transfer ownership of the freight."
+  },
+  {
+    "q": "When you sign the bill of lading at pickup, what does your signature legally represent?",
+    "opts": [
+      "A personal guarantee that cargo will arrive undamaged",
+      "Your carrier's agreement to the contract terms — you are acting as your company's legal agent",
+      "Confirmation that you personally inspected and counted all freight items",
+      "Your personal agreement to be liable for any cargo shortage"
+    ],
+    "ans": 1,
+    "exp": "When you sign the bill of lading, you are acting as your motor carrier's agent. Your signature legally binds your carrier to the contract terms on the bill of lading."
+  },
+  {
+    "q": "How must hazardous materials shipping papers be stored while you are driving?",
+    "opts": [
+      "In a locked file box in the sleeper berth",
+      "Within immediate reach — restrained by the seatbelt, visible to anyone entering the cab, or in a holder on the inside of the driver's door",
+      "Stored with the cargo in the trailer for emergency responder access",
+      "Submitted to the dispatcher electronically before departure"
+    ],
+    "ans": 1,
+    "exp": "While driving, hazmat shipping papers must be within immediate reach of the driver — either restrained by the seatbelt, visible to anyone entering the cab, or in a holder on the inside of the driver's door."
+  },
+  {
+    "q": "Where do many cargo thefts and hijackings occur?",
+    "opts": [
+      "At highway weigh stations",
+      "Within a few miles of the load's origin, shortly after leaving the shipper",
+      "At the delivery destination during unloading",
+      "At interstate rest areas more than 100 miles from the origin"
+    ],
+    "ans": 1,
+    "exp": "Many cargo thefts and hijackings occur within a few miles of the load's origin. Drivers should be especially alert immediately after leaving the shipper."
+  },
+  {
+    "q": "What are the two categories of trailer seals?",
+    "opts": [
+      "Paper and plastic seals",
+      "Indicative seals (tamper-evident, one-time use) and barrier seals (heavy-duty, harder to breach)",
+      "Official government seals and carrier-issued seals",
+      "Temperature seals and standard cargo seals"
+    ],
+    "ans": 1,
+    "exp": "Indicative seals are one-time-use, tamper-evident devices. Barrier seals are heavier-duty and require specialized tools to remove — providing stronger physical deterrence against unauthorized access."
+  },
+  {
+    "q": "What should you do if a stranger unexpectedly asks you to pull over while on the road?",
+    "opts": [
+      "Pull over and investigate the request",
+      "Stop only if they are wearing a safety vest or uniform",
+      "Treat it as suspicious — do not stop; contact law enforcement and your carrier immediately",
+      "Stop only at the next well-lit location, then assess"
+    ],
+    "ans": 2,
+    "exp": "Anyone unexpectedly asking you to stop should be treated as suspicious. A common hijacking tactic is to create a scenario that forces the driver to stop. Do not stop — contact law enforcement and your carrier immediately."
+  },
+  {
+    "q": "When loading or unloading independently, what safety steps must you take?",
+    "opts": [
+      "Leave the engine running to prevent battery drain",
+      "Set the parking brake, turn off the vehicle, put the keys in your pocket, and chock the wheels",
+      "Only set the parking brake — wheel chocks are optional unless on a grade",
+      "Set the trailer brakes only; the tractor brakes must remain released for dock positioning"
+    ],
+    "ans": 1,
+    "exp": "Before loading or unloading independently, set the parking brake, turn off the vehicle, put the keys in your pocket, and chock the wheels to prevent accidental vehicle movement during loading or unloading."
+  },
+  {
+    "q": "What is a split shipment?",
+    "opts": [
+      "A shipment divided between two separate trailers",
+      "Cargo picked up at more than one address, requiring a receipted bill of lading at each pickup address",
+      "A shipment that is partially delivered and partially returned to the shipper",
+      "Cargo split between hazardous and non-hazardous classifications in the same trailer"
+    ],
+    "ans": 1,
+    "exp": "A split shipment is cargo picked up from more than one address. A receipted bill of lading must be obtained at each pickup address, and every piece must be carefully verified against the paperwork."
+  },
+  {
+    "q": "What is the most secure trailer parking position at a truck stop?",
+    "opts": [
+      "Angled into a corner with the front of the trailer visible from the cab window",
+      "Backed against a wall, fence, or another closed trailer to block access to the trailer doors",
+      "Parked far from the entrance in a quiet, isolated area to avoid attention",
+      "Positioned with the trailer doors facing the main entrance for convenient access"
+    ],
+    "ans": 1,
+    "exp": "Backing the trailer against a wall, fence, or another closed trailer blocks access to the trailer doors, making unauthorized entry significantly more difficult."
+  },
+  {
+    "q": "What must you do before the freight is considered officially delivered?",
+    "opts": [
+      "Sign the bill of lading yourself to confirm delivery is complete",
+      "Obtain the receiver's (consignee's) signature on the bill of lading — the freight remains your responsibility until that signature is obtained",
+      "Verify that the seal is intact — no signature is required if the seal has not been broken",
+      "Have the carrier's dispatcher confirm delivery remotely via electronic signature"
+    ],
+    "ans": 1,
+    "exp": "At delivery, the freight remains the driver's responsibility until the consignee signs the bill of lading confirming receipt. The driver should also document any discrepancies, shortages, or damage per the carrier's policy."
+  }
+]
+
+// ============ ICONS ============
+const ICON_PLAY = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5v9l8-4.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 12 12"><path d="M2.5 1.5h2.5v9h-2.5zM7 1.5h2.5v9h-2.5z"/></svg>';
+const ICON_DONE = '<svg viewBox="0 0 12 12"><path d="M10.5 3l-6 6-2.5-2.5L1 7.5l3.5 3.5L11.5 4z"/></svg>';
+
+// ============ STATE ============
+let currentSlide = 0;
+let narrationCollapsed = false;
+let viewMode = 'welcome';
+let currentQuestion = 0;
+let score = 0;
+let answered = new Array(quizData.length).fill(null);
+let unlockStatus = new Array(slides.length).fill(false);
+
+// Audio state — needed for pause/resume
+let audioTimerInterval = null;
+let estimatedDuration = 0;     // seconds — total expected for current narration
+let audioElapsed = 0;          // seconds — accumulated playback time
+let audioPlayStart = 0;        // ms — Date.now() at the moment current play segment started
+let isPlaying = false;
+let isComplete = false;
+let currentNarrationText = '';
+let currentAudio = null;       // <audio> element when USE_MP3 is true
+let currentUtterance = null;   // SpeechSynthesisUtterance when using TTS
+
+function saveCurrentState(){
+  Progress.saveState(CURRENT_MODULE_SLUG, { currentSlide, viewMode, unlockStatus: unlockStatus.slice() });
+}
+
+function resetThisModule(){
+  if(confirm('Reset all progress for this module? Your quiz score and completed slides will be cleared.')){
+    Progress.resetModule(CURRENT_MODULE_SLUG);
+    window.location.reload();
+  }
+}
+
+// ── Active-time tracker ──────────────────────────────────────────────────────
+(function(){
+  let _start = Date.now(), _accum = 0;
+  function _flush(){
+    const secs = Math.round(_accum + (Date.now() - _start) / 1000);
+    _accum = 0; _start = Date.now();
+    if(secs < 1) return;
+    const data = Progress._load();
+    if(!data[CURRENT_MODULE_SLUG]) data[CURRENT_MODULE_SLUG] = {};
+    data[CURRENT_MODULE_SLUG].timeSpent = (data[CURRENT_MODULE_SLUG].timeSpent || 0) + secs;
+    Progress._save(data);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden'){ _flush(); }
+    else { _start = Date.now(); }
+  });
+  window.addEventListener('beforeunload', _flush);
+  setInterval(_flush, 30000);
+})();
+
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  Progress.markStarted(CURRENT_MODULE_SLUG);
+  const _saved = Progress.loadState(CURRENT_MODULE_SLUG);
+  if(_saved){
+    unlockStatus = (_saved.unlockStatus && _saved.unlockStatus.length === slides.length)
+      ? _saved.unlockStatus : new Array(slides.length).fill(false);
+    if(_saved.viewMode === 'slide' && typeof _saved.currentSlide === 'number') renderSlide(_saved.currentSlide);
+    else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
+  }
+  const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 33'; }
+  buildDropdown();
+  buildTOC();
+  updateTOC();
+  setupDropdownToggle();
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+  window.addEventListener('beforeunload', stopAudio);
+}
+
+function buildDropdown(){
+  const items = document.getElementById('dropdownItems');
+  items.innerHTML = '';
+  const all = Progress.getAll();
+  let completedCount = 0;
+  REGISTRY.forEach((m) => {
+    const isCurrent = m.slug === CURRENT_MODULE_SLUG;
+    const record = all[m.slug] || {};
+    const isCompleted = !!record.completed;
+    if(isCompleted) completedCount++;
+    const isUnlocked = Progress.isUnlocked(m.slug, REGISTRY);
+    let cls = 'dropdown-item';
+    if(isCurrent) cls += ' current';
+    else if(isCompleted) cls += ' completed';
+    else if(isUnlocked) cls += ' unlocked';
+    else cls += ' locked';
+    const link = document.createElement('a');
+    link.className = cls;
+    link.setAttribute('role','menuitem');
+    if(isCurrent){
+      link.style.pointerEvents = 'none';
+      link.href = 'javascript:void(0)';
+    } else if(isCompleted || isUnlocked){
+      link.href = './' + m.file;
+    } else {
+      link.href = 'javascript:void(0)';
+      link.addEventListener('click', e => { e.preventDefault(); });
+    }
+    link.innerHTML = '<div class="dropdown-item-status"></div>' +
+      '<div class="di-text">' +
+      '<div class="di-num">Module ' + m.num + ' · Unit ' + m.unit + '</div>' +
+      '<div class="di-title">' + m.title + '</div>' +
+      '</div>';
+    items.appendChild(link);
+  });
+  document.getElementById('dropdownHeaderProgress').textContent = completedCount + ' of 33 complete';
+}
+
+function setupDropdownToggle(){
+  const wrap = document.getElementById('unitDropdown');
+  const trigger = document.getElementById('unitTrigger');
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen);
+  });
+  document.addEventListener('click', e => {
+    if(!wrap.contains(e.target)){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      wrap.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+    }
+  });
+}
+
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  toc.innerHTML = '';
+  let lastSection = null;
+  slides.forEach((s, i) => {
+    if(s.section !== lastSection){
+      const h = document.createElement('div');
+      h.className = 'toc-section';
+      h.textContent = s.sectionLabel;
+      toc.appendChild(h);
+      lastSection = s.section;
+    }
+    const item = document.createElement('div');
+    item.className = 'toc-item locked';
+    item.dataset.idx = i;
+    item.innerHTML = '<div class="toc-check"></div><span>' + s.title + '</span>';
+    item.addEventListener('click', () => jumpTo(i));
+    toc.appendChild(item);
+  });
+}
+
+function updateTOC(){
+  document.querySelectorAll('.toc-item').forEach(el => {
+    const i = parseInt(el.dataset.idx);
+    el.classList.remove('active','completed','locked');
+    if(i === currentSlide && viewMode === 'slide') el.classList.add('active');
+    if(unlockStatus[i]) el.classList.add('completed');
+    const clickable = unlockStatus[i] || i === currentSlide || (i > 0 && i <= getMaxReached());
+    if(!clickable) el.classList.add('locked');
+  });
+  const allDone = unlockStatus.every(x => x);
+  const quizEl = document.getElementById('tocQuiz');
+  if(allDone){ quizEl.classList.add('unlocked'); } else { quizEl.classList.remove('unlocked'); }
+}
+
+function getMaxReached(){
+  for(let i = 0; i < slides.length; i++){ if(!unlockStatus[i]) return i; }
+  return slides.length - 1;
+}
+
+function updateProgress(){
+  const done = unlockStatus.filter(x => x).length;
+  const pct = Math.round((done / slides.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+}
+
+function startCourse(){
+  viewMode = 'slide';
+  renderSlide(0);
+}
+
+function renderMediaHTML(s){
+  if(!s.image && !s.video) return '';
+  let out = '<div class="slide-media">';
+  if(s.image){
+    const src = typeof s.image === 'string' ? s.image : s.image.src;
+    const cap = (typeof s.image === 'object' && s.image.caption) ? s.image.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<img class="slide-img" src="' + src + '" alt="' + (cap||'') + '" loading="lazy">'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  if(s.video){
+    const src = typeof s.video === 'string' ? s.video : s.video.src;
+    const poster = (typeof s.video === 'object' && s.video.poster) ? ' poster="' + s.video.poster + '"' : '';
+    const cap = (typeof s.video === 'object' && s.video.caption) ? s.video.caption : '';
+    out += '<figure class="slide-figure">'
+         + '<div class="slide-video-wrap">'
+         + '<video class="slide-video" controls playsinline' + poster + '>'
+         + '<source src="' + src + '" type="video/mp4">'
+         + 'Your browser does not support video playback.</video>'
+         + '<button class="video-replay-btn" onclick="this.previousElementSibling.currentTime=0;this.previousElementSibling.play()">&#x21BA; Replay</button>'
+         + '</div>'
+         + (cap ? '<figcaption>' + cap + '</figcaption>' : '')
+         + '</figure>';
+  }
+  out += '</div>';
+  return out;
+}
+
+function renderSlide(i){
+  stopAudio();
+  currentSlide = i;
+  viewMode = 'slide';
+  saveCurrentState();
+  const s = slides[i];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-section-label">${s.sectionLabel}</div>
+      <div class="slide-counter">Slide ${i+1} of ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+    </div>
+    <div class="slide-content">${s.contentHTML}</div>
+    ${renderMediaHTML(s)}
+    <div class="narration-box" id="narrationBox">
+      <div class="narration-header">
+        <div class="narration-label"><span class="narration-icon">🔊</span><span>Narration</span><button class="narration-toggle" type="button" onclick="toggleNarration()" title="Hide/show narration text">▼</button></div>
+        <div class="audio-control">
+          <button class="audio-btn" id="audioBtn" type="button" aria-label="Pause narration" onclick="togglePlayPause()">${ICON_PAUSE}</button>
+          <span class="audio-btn-label playing" id="audioBtnLabel">Playing</span>
+        </div>
+      </div>
+      <div class="narration-body">
+        <div class="narration-text">${s.narration}</div>
+        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+      </div>
+    </div>
+    <div class="slide-nav">
+      <button class="btn btn-prev" id="prevBtn" ${i === 0 ? 'disabled' : ''} onclick="prevSlide()">← Previous</button>
+      <div class="lock-msg" id="lockMsg">🔒 Listen to the narration to continue</div>
+      <button class="btn btn-next locked" id="nextBtn" disabled onclick="nextSlide()">${i === slides.length - 1 ? 'Knowledge Check →' : 'Next →'}</button>
+    </div>
+  `;
+  updateTOC();
+  updateProgress();
+  if(narrationCollapsed){const b=document.getElementById('narrationBox');if(b)b.classList.add('collapsed');}
+  if(unlockStatus[i]){
+    setAudioControlDone();
+    onAudioComplete(true);
+  } else {
+    currentNarrationText = s.narration;
+    audioElapsed = 0;
+    estimatedDuration = estimateDuration(s.narration);
+    isComplete = false;
+    playNarration(s.narration, i, 0);
+  }
+}
+
+// ============ AUDIO PLAYBACK ============
+// Two modes: USE_MP3 (HTMLAudioElement, full pause/resume support) or
+// browser TTS (SpeechSynthesisUtterance — pause/resume is unreliable cross-browser,
+// so we approximate with cancel-and-restart-from-elapsed-position).
+
+function playNarration(text, slideIdx, fromElapsedSeconds){
+  fromElapsedSeconds = fromElapsedSeconds || 0;
+  audioElapsed = fromElapsedSeconds;
+  const _slideAudio = (slides[slideIdx] || {}).audioUrl || null;
+  if(_slideAudio || USE_MP3){
+    const file = _slideAudio || AUDIO_BASE_PATH + 'slide_' + String(slideIdx).padStart(2,'0') + '.mp3';
+    currentAudio = new Audio(file);
+    currentAudio.onloadedmetadata = () => {
+      estimatedDuration = currentAudio.duration;
+      if(fromElapsedSeconds > 0 && fromElapsedSeconds < currentAudio.duration){
+        currentAudio.currentTime = fromElapsedSeconds;
+      }
+    };
+    currentAudio.onended = () => onAudioComplete(false);
+    currentAudio.onerror = () => playTTS(text, fromElapsedSeconds);
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => playTTS(text, fromElapsedSeconds));
+    return;
+  }
+  playTTS(text, fromElapsedSeconds);
+}
+
+function playTTS(text, fromElapsedSeconds){
+  if(!('speechSynthesis' in window)){
+    onAudioComplete(false);
+    return;
+  }
+  let textToSpeak = text;
+  if(fromElapsedSeconds > 0 && estimatedDuration > 0){
+    const totalWords = text.split(/\s+/).length;
+    const ratio = Math.min(1, fromElapsedSeconds / estimatedDuration);
+    const skipWords = Math.floor(totalWords * ratio);
+    const words = text.split(/\s+/);
+    textToSpeak = words.slice(skipWords).join(' ');
+    if(!textToSpeak.trim()){ onAudioComplete(false); return; }
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(textToSpeak);
+    u.rate = NARRATION_RATE;
+    u.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const en = voices.find(v => /en-US/i.test(v.lang)) || voices.find(v => /en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = () => onAudioComplete(false);
+    u.onerror = () => onAudioComplete(false);
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    isPlaying = true;
+    audioPlayStart = Date.now();
+    setAudioControlPlaying();
+    startProgressTimer();
+  } catch(e){
+    onAudioComplete(false);
+  }
+}
+
+function toggleNarration(){
+  narrationCollapsed=!narrationCollapsed;
+  const box=document.getElementById('narrationBox');
+  if(box) box.classList.toggle('collapsed');
+}
+function togglePlayPause(){
+  if(isComplete) return;
+  if(isPlaying){ pauseAudio(); } else { resumeAudio(); }
+}
+
+function pauseAudio(){
+  if(!isPlaying) return;
+  if(audioPlayStart > 0){ audioElapsed += (Date.now() - audioPlayStart) / 1000; audioPlayStart = 0; }
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(USE_MP3 && currentAudio){
+    currentAudio.pause();
+  } else if(window.speechSynthesis){
+    if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+    window.speechSynthesis.cancel();
+  }
+  isPlaying = false;
+  setAudioControlPaused();
+}
+
+function resumeAudio(){
+  if(isPlaying || isComplete) return;
+  if(USE_MP3 && currentAudio){
+    currentAudio.play().then(() => {
+      isPlaying = true;
+      audioPlayStart = Date.now();
+      setAudioControlPlaying();
+      startProgressTimer();
+    }).catch(() => { playTTS(currentNarrationText, audioElapsed); });
+  } else {
+    playTTS(currentNarrationText, audioElapsed);
+  }
+}
+
+function setAudioControlPlaying(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label','Pause narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label playing'; lbl.textContent = 'Playing'; }
+}
+
+function setAudioControlPaused(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_PLAY; btn.setAttribute('aria-label','Resume narration'); btn.disabled = false; }
+  if(lbl){ lbl.className = 'audio-btn-label paused'; lbl.textContent = 'Paused'; }
+}
+
+function setAudioControlDone(){
+  const btn = document.getElementById('audioBtn');
+  const lbl = document.getElementById('audioBtnLabel');
+  if(btn){ btn.innerHTML = ICON_DONE; btn.setAttribute('aria-label','Narration complete'); btn.disabled = true; }
+  if(lbl){ lbl.className = 'audio-btn-label done'; lbl.textContent = 'Complete'; }
+}
+
+function estimateDuration(text){
+  const words = text.split(/\s+/).length;
+  return Math.max(8, (words / 155) * 60);
+}
+
+function startProgressTimer(){
+  if(audioTimerInterval) clearInterval(audioTimerInterval);
+  const fill = document.getElementById('audioProgress');
+  audioTimerInterval = setInterval(() => {
+    if(!isPlaying){ return; }
+    const liveElapsed = audioElapsed + (Date.now() - audioPlayStart) / 1000;
+    const pct = Math.min(100, (liveElapsed / estimatedDuration) * 100);
+    if(fill) fill.style.width = pct + '%';
+    if(liveElapsed > estimatedDuration + 2 && !isComplete && !unlockStatus[currentSlide]){
+      onAudioComplete(false);
+    }
+  }, 200);
+}
+
+function onAudioComplete(skipUnlock){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  isComplete = true;
+  isPlaying = false;
+  const fill = document.getElementById('audioProgress');
+  if(fill) fill.style.width = '100%';
+  setAudioControlDone();
+  if(!skipUnlock){
+    unlockStatus[currentSlide] = true;
+    saveCurrentState();
+  }
+  const next = document.getElementById('nextBtn');
+  const lock = document.getElementById('lockMsg');
+  if(next){ next.classList.remove('locked'); next.disabled = false; }
+  if(lock){ lock.classList.add('unlocked'); lock.innerHTML = '✓ Ready to continue'; }
+  updateTOC();
+  updateProgress();
+}
+
+function stopAudio(){
+  if(audioTimerInterval){ clearInterval(audioTimerInterval); audioTimerInterval = null; }
+  if(currentUtterance){ currentUtterance.onend = null; currentUtterance.onerror = null; currentUtterance = null; }
+  if(window.speechSynthesis){ window.speechSynthesis.cancel(); }
+  if(currentAudio){ currentAudio.pause(); currentAudio = null; }
+  isPlaying = false;
+  audioPlayStart = 0;
+}
+
+function nextSlide(){
+  if(!unlockStatus[currentSlide]) return;
+  if(currentSlide < slides.length - 1){ renderSlide(currentSlide + 1); }
+  else { startQuiz(); }
+}
+
+function prevSlide(){ if(currentSlide > 0){ renderSlide(currentSlide - 1); } }
+
+function jumpTo(i){
+  const max = getMaxReached();
+  if(i > max && !unlockStatus[i]) return;
+  renderSlide(i);
+}
+
+// ============ QUIZ ============
+function tryStartQuiz(){ if(!unlockStatus.every(x => x)) return; startQuiz(); }
+
+function startQuiz(){
+  stopAudio();
+  viewMode = 'quiz';
+  currentQuestion = 0;
+  score = 0;
+  answered = new Array(quizData.length).fill(null);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizData[currentQuestion];
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-header">
+        <div class="quiz-counter">Question ${currentQuestion + 1} of ${quizData.length}</div>
+        <div class="quiz-title">Knowledge Check</div>
+        <div class="quiz-subtitle">Pass with 80% or higher (12 of 15 correct)</div>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('quizOpts');
+  q.opts.forEach((opt, oi) => {
+    const el = document.createElement('div');
+    el.className = 'quiz-opt';
+    el.innerHTML = '<div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div>';
+    el.addEventListener('click', () => selectAnswer(oi));
+    optsEl.appendChild(el);
+  });
+  updateTOC();
+}
+
+function selectAnswer(oi){
+  if(answered[currentQuestion] !== null) return;
+  const q = quizData[currentQuestion];
+  answered[currentQuestion] = oi;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === q.ans) el.classList.add('correct');
+    else if(i === oi) el.classList.add('wrong');
+  });
+  const correct = oi === q.ans;
+  if(correct) score++;
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = '<div class="quiz-feedback-label">' + (correct ? '✓ Correct' : '✗ Not Quite') + '</div>' + q.exp;
+  const nav = document.getElementById('quizNav');
+  const isLast = currentQuestion === quizData.length - 1;
+  nav.innerHTML = '<button class="btn btn-next" onclick="nextQuestion()">' + (isLast ? 'View Results →' : 'Next Question →') + '</button>';
+}
+
+function nextQuestion(){
+  if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); }
+  else { showResults(); }
+}
+
+function showResults(){
+  viewMode = 'results';
+  const pct = Math.round((score / quizData.length) * 100);
+  const pass = pct >= 80;
+  const deg = (pct / 100) * 360;
+  if(pass){
+    Progress.markComplete(CURRENT_MODULE_SLUG, pct);
+    buildDropdown();
+  }
+  const idx = REGISTRY.findIndex(m => m.slug === CURRENT_MODULE_SLUG);
+  const nextModule = idx >= 0 && idx < REGISTRY.length - 1 ? REGISTRY[idx + 1] : null;
+  const panel = document.getElementById('slidePanel');
+  panel.innerHTML = `
+    <div class="results">
+      <div class="results-score-ring ${pass ? '' : 'fail'}" style="--score-deg: ${deg}deg">
+        <div class="results-score-inner">
+          <div class="results-score-num">${pct}%</div>
+          <div class="results-score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title ${pass ? 'pass' : 'fail'}">${pass ? 'You Passed!' : 'Not Yet'}</div>
+      <div class="results-message">
+        ${pass
+          ? (nextModule
+              ? 'You\'ve completed Module ' + REGISTRY[idx].num + '. Module ' + nextModule.num + ' — ' + nextModule.title + ' — is now unlocked.'
+              : 'You\'ve completed the final module of the ELDT NOW course. Congratulations.')
+          : 'You need 80% (12 of 15) to pass this module. Review the material and try again — you\'ve got this.'}
+      </div>
+      <div class="results-breakdown">
+        <div class="results-stat"><div class="results-stat-num">${score}</div><div class="results-stat-label">Correct</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length - score}</div><div class="results-stat-label">Incorrect</div></div>
+        <div class="results-stat"><div class="results-stat-num">${quizData.length}</div><div class="results-stat-label">Total</div></div>
+      </div>
+      <div class="results-actions">
+        ${pass
+          ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
+            (nextModule
+              ? '<a class="btn btn-next" href="./' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
+              : '<a class="btn btn-next" href="./index.html">Back to Course Home</a>')
+          : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
+      </div>
+    </div>
+  `;
+}
+
+function reviewAnswers(){
+  let i = 0;
+  function show(){
+    if(i >= quizData.length){ showResults(); return; }
+    const q = quizData[i];
+    const userAns = answered[i];
+    const correct = userAns === q.ans;
+    const panel = document.getElementById('slidePanel');
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-header">
+          <div class="quiz-counter">Review · Question ${i + 1} of ${quizData.length}</div>
+          <div class="quiz-title">${correct ? '✓ You answered correctly' : '✗ You missed this one'}</div>
+        </div>
+        <div class="quiz-question">${q.q}</div>
+        <div class="quiz-opts">
+          ${q.opts.map((opt, oi) => {
+            let cls = 'quiz-opt disabled';
+            if(oi === q.ans) cls += ' correct';
+            else if(oi === userAns) cls += ' wrong';
+            return '<div class="' + cls + '"><div class="quiz-opt-letter">' + String.fromCharCode(65 + oi) + '</div><div>' + opt + '</div></div>';
+          }).join('')}
+        </div>
+        <div class="quiz-feedback correct" style="display:block">
+          <div class="quiz-feedback-label">Explanation</div>${q.exp}
+        </div>
+        <div class="quiz-nav">
+          ${i > 0 ? '<button class="btn btn-prev" id="reviewPrev">← Previous</button>' : ''}
+          <button class="btn btn-next" id="reviewNext">${i === quizData.length - 1 ? 'Back to Results' : 'Next →'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('reviewNext').onclick = () => { i++; show(); };
+    const prevBtn = document.getElementById('reviewPrev');
+    if(prevBtn) prevBtn.onclick = () => { i--; show(); };
+  }
+  show();
+}
+
+function reviewCourse(){ renderSlide(0); }
+</script>
+</body>
+</html>
