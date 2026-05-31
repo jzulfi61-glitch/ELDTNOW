@@ -298,14 +298,22 @@ document.getElementById('nameInput').addEventListener('keydown', function(e){
 
 // ── Init ──────────────────────────────────────────────────────────────────
 (function init(){
-  if(!allComplete()){
+  const preview = new URLSearchParams(window.location.search).get('preview') === '1';
+
+  if(!preview && !allComplete()){
     document.getElementById('notCompleteWrap').style.display = '';
     document.getElementById('nameOverlay').classList.add('hidden');
     return;
   }
 
-  const savedName = localStorage.getItem(NAME_KEY);
+  const savedName = preview
+    ? (localStorage.getItem(NAME_KEY) || 'John A. Driver')
+    : localStorage.getItem(NAME_KEY);
+
   if(savedName){
+    if(preview && !localStorage.getItem(DATE_KEY)){
+      localStorage.setItem(DATE_KEY, new Date().toISOString());
+    }
     showCertificate(savedName);
   } else {
     document.getElementById('nameOverlay').classList.remove('hidden');
