@@ -254,13 +254,27 @@ function fmtDate(iso){
   return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 }
 
-function showCertificate(name){
-  // Store / retrieve completion date
-  let dateStr = localStorage.getItem(DATE_KEY);
-  if(!dateStr){
-    dateStr = new Date().toISOString();
-    try{ localStorage.setItem(DATE_KEY, dateStr); }catch(e){}
+function getCompletionDate(){
+  // Read completedAt stored by markComplete() when each module is passed.
+  // Use the most recent completedAt across all 30 modules (= when the last
+  // module was actually passed, regardless of which one was finished last).
+  const p = getProgress();
+  let latest = null;
+  for(const slug of REGISTRY_SLUGS){
+    const rec = p[slug];
+    if(rec && rec.completedAt){
+      if(!latest || rec.completedAt > latest) latest = rec.completedAt;
+    }
   }
+  if(latest) return latest;
+  // Fallback for older completions that predate completedAt storage
+  let stored = localStorage.getItem(DATE_KEY);
+  if(!stored){ stored = new Date().toISOString(); try{ localStorage.setItem(DATE_KEY, stored); }catch(e){} }
+  return stored;
+}
+
+function showCertificate(name){
+  const dateStr = getCompletionDate();
 
   document.getElementById('certNameDisplay').textContent = name;
   document.getElementById('certDateDisplay').textContent  = fmtDate(dateStr);
