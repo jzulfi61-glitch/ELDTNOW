@@ -330,7 +330,7 @@ const AUDIO_BASE_PATH = './audio/'; // ← folder for slide_00.mp3, slide_01.mp3
 const NARRATION_RATE = 0.95;
 
 // ============ CROSS-MODULE PROGRESS SYSTEM ============
-// Tracks completion of all 33 modules. Currently localStorage-based.
+// Tracks completion of all 30 modules. Currently localStorage-based.
 // To migrate to a backend account system later, replace the four method
 // bodies below with API calls. The rest of the application code does not
 // need to change.
@@ -738,7 +738,7 @@ function init(){
     else if(_saved.viewMode === 'quiz' || _saved.viewMode === 'results') renderSlide(slides.length - 1);
   }
   const _mod = REGISTRY.find(m => m.slug === CURRENT_MODULE_SLUG);
-  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 33'; }
+  if(_mod){ const el = document.getElementById('moduleCounter'); if(el) el.innerHTML = 'Module <strong>' + _mod.num + '</strong> of 30'; }
   buildDropdown();
   buildTOC();
   updateTOC();
