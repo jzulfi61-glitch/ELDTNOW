@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELDT NOW · Certificate of Completion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2a;--blue:#1b4f8a;--accent:#e8a020;--accent-dark:#b57a14;
+  --success:#2e7d4f;--light:#f0f4f8;--border:#dce3ed;--muted:#6b7a8d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#e8ecf0;font-family:'Source Sans 3',system-ui,sans-serif}
+
+/* ── Screen action bar ── */
+.action-bar{background:var(--navy);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
+.action-bar-left{display:flex;align-items:center;gap:12px}
+.logo-mark{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1.5px;color:var(--accent)}
+.logo-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.75);text-transform:uppercase}
+.action-bar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-act{font-family:'Barlow Condensed',sans-serif;padding:10px 22px;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:5px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.btn-print{background:var(--accent);color:var(--navy)}
+.btn-print:hover{background:var(--accent-dark)}
+.btn-edit{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn-edit:hover{background:rgba(255,255,255,.22)}
+.btn-home{background:transparent;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.2);text-decoration:none}
+.btn-home:hover{color:#fff;border-color:rgba(255,255,255,.5)}
+.print-hint{font-size:13px;color:rgba(255,255,255,.5);font-style:italic}
+
+/* ── Certificate wrapper (screen) ── */
+.cert-wrapper{padding:36px 24px 56px;display:flex;justify-content:center;align-items:flex-start}
+
+/* ── The certificate card ── */
+#certificate{
+  width:100%;max-width:1020px;background:#fff;
+  border:6px solid var(--accent);
+  outline:2px solid var(--navy);
+  outline-offset:5px;
+  border-radius:4px;
+  padding:52px 64px;
+  box-shadow:0 12px 48px rgba(0,0,0,.18);
+  position:relative;
+  min-height:680px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  text-align:center;
+}
+
+/* corner ornaments */
+#certificate::before,#certificate::after{
+  content:'✦';
+  position:absolute;font-size:22px;color:var(--accent);line-height:1;
+}
+#certificate::before{top:14px;left:20px}
+#certificate::after{top:14px;right:20px}
+.cert-corner-bl,.cert-corner-br{position:absolute;font-size:22px;color:var(--accent);line-height:1;bottom:14px}
+.cert-corner-bl{left:20px}
+.cert-corner-br{right:20px}
+
+/* ── Certificate typography ── */
+.cert-top{width:100%}
+.cert-issuer{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+.cert-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;letter-spacing:3px;color:var(--navy);line-height:1}
+.cert-wordmark span{color:var(--accent)}
+
+.cert-divider{width:100%;display:flex;align-items:center;gap:14px;margin:14px 0}
+.cert-divider-line{flex:1;height:1.5px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.cert-divider-diamond{width:8px;height:8px;background:var(--accent);transform:rotate(45deg);flex-shrink:0}
+
+.cert-headline{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--navy);margin-bottom:6px}
+
+.cert-mid{width:100%;padding:10px 0}
+.cert-to{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--muted);letter-spacing:1px;font-style:italic;margin-bottom:4px}
+.cert-name{font-family:'Pinyon Script',cursive;font-size:72px;color:var(--navy);line-height:1.1;margin-bottom:0px;letter-spacing:1px;min-height:90px;display:flex;align-items:center;justify-content:center}
+.cert-name-line{width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--accent-dark),transparent);margin:2px auto 18px}
+.cert-completed-text{font-family:'Source Sans 3',sans-serif;font-size:16px;color:var(--muted);letter-spacing:.5px;margin-bottom:14px}
+
+.cert-course-name{font-family:'Barlow Condensed',sans-serif;font-size:58px;font-weight:800;color:var(--navy);letter-spacing:3px;line-height:1;margin-bottom:8px}
+.cert-course-sub{font-family:'Barlow Condensed',sans-serif;font-size:18px;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:6px}
+.cert-course-detail{font-size:14px;color:var(--muted);letter-spacing:.5px}
+
+.cert-bottom{width:100%;margin-top:8px}
+.cert-date-row{font-size:14px;color:var(--muted);margin-bottom:18px;letter-spacing:.5px}
+.cert-date-row strong{color:var(--navy);font-weight:600}
+
+.cert-sigs{display:flex;align-items:flex-end;justify-content:space-between;width:100%;gap:20px}
+.cert-sig{flex:1;text-align:center}
+.cert-sig-line{height:1px;background:var(--border);margin-bottom:6px}
+.cert-sig-label{font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif}
+
+.cert-seal{width:96px;height:96px;border-radius:50%;background:var(--navy);border:3px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.cert-seal-inner{width:80px;height:80px;border-radius:50%;border:2px solid rgba(232,160,32,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px}
+.cert-seal-mark{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--accent);letter-spacing:1px;line-height:1}
+.cert-seal-sub{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;line-height:1.2;text-align:center}
+.cert-seal-year{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--accent);font-weight:700;margin-top:3px}
+.cert-fmcsa{font-size:11px;color:var(--muted);margin-top:12px;font-style:italic}
+
+/* ── Name entry overlay ── */
+.overlay{position:fixed;inset:0;background:rgba(13,27,42,.82);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(3px)}
+.overlay.hidden{display:none}
+.overlay-card{background:#fff;border-radius:12px;padding:44px 48px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.overlay-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-dark);margin-bottom:10px;font-weight:700}
+.overlay-title{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.overlay-sub{font-size:15px;color:var(--muted);line-height:1.55;margin-bottom:28px}
+.overlay-input{width:100%;border:2px solid var(--border);border-radius:8px;padding:14px 18px;font-size:20px;font-family:'Source Sans 3',sans-serif;color:var(--navy);outline:none;text-align:center;transition:border-color .15s;margin-bottom:18px}
+.overlay-input:focus{border-color:var(--blue)}
+.overlay-input::placeholder{color:var(--muted);font-size:17px}
+.overlay-btn{width:100%;font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:var(--accent);border:none;padding:16px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:8px;cursor:pointer;transition:background .15s}
+.overlay-btn:hover{background:var(--blue)}
+.overlay-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+.overlay-note{font-size:13px;color:var(--muted);margin-top:14px;font-style:italic}
+
+/* ── Not-complete screen ── */
+.not-complete{padding:80px 32px;text-align:center;max-width:560px;margin:0 auto}
+.not-complete h2{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.not-complete p{font-size:16px;color:var(--muted);line-height:1.55;margin-bottom:28px}
+.not-complete a{display:inline-block;font-family:'Barlow Condensed',sans-serif;background:var(--navy);color:var(--accent);padding:14px 36px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;text-decoration:none}
+
+/* ── Print styles ── */
+@media print{
+  @page{size:landscape;margin:.4in}
+  html,body{background:#fff !important}
+  .action-bar,.no-print{display:none !important}
+  .cert-wrapper{padding:0}
+  #certificate{
+    box-shadow:none;
+    max-width:none;
+    width:100%;
+    border:5px solid var(--accent) !important;
+    outline:2px solid var(--navy) !important;
+    outline-offset:5px !important;
+    min-height:0;
+    padding:36px 52px;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .cert-course-name{font-size:48px}
+  .cert-name{font-size:62px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Action bar (hidden on print) ── -->
+<div class="action-bar no-print">
+  <div class="action-bar-left">
+    <span class="logo-mark">ELDT NOW</span>
+    <span class="logo-text">Certificate</span>
+  </div>
+  <div class="action-bar-right">
+    <span class="print-hint">To save as PDF: choose "Save as PDF" in the print dialog</span>
+    <button class="btn-act btn-edit" onclick="editName()">✎ Edit Name</button>
+    <button class="btn-act btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
+    <a class="btn-act btn-home" href="./index.html">← Course Home</a>
+  </div>
+</div>
+
+<!-- ── Name entry overlay ── -->
+<div class="overlay" id="nameOverlay">
+  <div class="overlay-card">
+    <div class="overlay-eyebrow">Almost There</div>
+    <div class="overlay-title">Your Certificate Awaits</div>
+    <p class="overlay-sub">Enter your full name exactly as you'd like it to appear on your completion certificate.</p>
+    <input class="overlay-input" id="nameInput" type="text" placeholder="Your Full Name" maxlength="60" autocomplete="name">
+    <button class="overlay-btn" id="nameBtn" onclick="saveName()" disabled>Generate Certificate →</button>
+    <p class="overlay-note">Your name is saved in your browser — it will be here next time.</p>
+  </div>
+</div>
+
+<!-- ── Certificate (printable area) ── -->
+<div class="cert-wrapper" id="certWrapper" style="display:none">
+  <div id="certificate">
+    <span class="cert-corner-bl">✦</span>
+    <span class="cert-corner-br">✦</span>
+
+    <!-- Top -->
+    <div class="cert-top">
+      <div class="cert-issuer">Presented by</div>
+      <div class="cert-wordmark">ELDT<span>&nbsp;NOW</span></div>
+      <div class="cert-divider">
+        <div class="cert-divider-line"></div>
+        <div class="cert-divider-diamond"></div>
+        <div class="cert-divider-line"></div>
+      </div>
+      <div class="cert-headline">Certificate of Completion</div>
+    </div>
+
+    <!-- Middle -->
+    <div class="cert-mid">
+      <div class="cert-to">This is to certify that</div>
+      <div class="cert-name" id="certNameDisplay"></div>
+      <div class="cert-name-line"></div>
+      <div class="cert-completed-text">has successfully completed all required modules of the</div>
+      <div class="cert-course-name">CLASS A ELDT</div>
+      <div class="cert-course-sub">FMCSA-Compliant Entry-Level Driver Training Theory Course</div>
+      <div class="cert-course-detail">30 Modules &nbsp;·&nbsp; 15 Quiz Questions Each &nbsp;·&nbsp; 80% Minimum Passing Score &nbsp;·&nbsp; 49 CFR Part 380</div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="cert-bottom">
+      <div class="cert-date-row">Date Completed: <strong id="certDateDisplay"></strong></div>
+      <div class="cert-sigs">
+        <div class="cert-sig">
+          <div class="cert-sig-line"></div>
+          <div class="cert-sig-label">Training Director, ELDT NOW</div>
+        </div>
+        <div class="cert-seal">
+          <div class="cert-seal-inner">
+            <div class="cert-seal-mark">ELDT NOW</div>
+            <div class="cert-seal-sub">Entry-Level Driver Training</div>
+            <div class="cert-seal-year" id="certSealYear"></div>
+          </div>
+        </div>
+        <div class="cert-sig">
+          <div class="cert-sig-line"></div>
+          <div class="cert-sig-label">Date of Completion</div>
+        </div>
+      </div>
+      <div class="cert-fmcsa">Per Federal Motor Carrier Safety Administration regulations — 49 CFR Part 380</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Not complete screen ── -->
+<div class="cert-wrapper" id="notCompleteWrap" style="display:none">
+  <div class="not-complete">
+    <h2>Course Not Yet Complete</h2>
+    <p>You need to pass all 30 modules with 80% or higher before receiving your certificate. Keep going — you're almost there!</p>
+    <a href="./index.html">← Back to Course Home</a>
+  </div>
+</div>
+
+<script>
+const PROGRESS_KEY = 'eldtnow_progress';
+const NAME_KEY     = 'eldtnow_student_name';
+const DATE_KEY     = 'eldtnow_completion_date';
+
+const TOTAL_MODULES = 30;
+const REGISTRY_SLUGS = ["orientation","control-systems-dashboard","pretrip-posttrip-inspections","basic-control","shifting-operating-transmissions","backing-and-docking","coupling-and-uncoupling","visual-search","communication","distracted-driving","speed-management","space-management","night-operation","extreme-driving-conditions","hazard-perception","skid-control-recovery","railroad-highway-grade-crossings","identification-diagnosis-malfunctions","roadside-inspections","maintenance","handling-documenting-cargo","environmental-compliance","hours-of-service","fatigue-wellness","post-crash-procedures","external-communications","whistleblower-coercion","trip-planning","drugs-alcohol","medical-requirements"];
+
+function getProgress(){
+  try{ return JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}'); }catch(e){ return {}; }
+}
+
+function allComplete(){
+  const p = getProgress();
+  return REGISTRY_SLUGS.every(slug => p[slug] && p[slug].completed);
+}
+
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+
+function showCertificate(name){
+  // Store / retrieve completion date
+  let dateStr = localStorage.getItem(DATE_KEY);
+  if(!dateStr){
+    dateStr = new Date().toISOString();
+    try{ localStorage.setItem(DATE_KEY, dateStr); }catch(e){}
+  }
+
+  document.getElementById('certNameDisplay').textContent = name;
+  document.getElementById('certDateDisplay').textContent  = fmtDate(dateStr);
+  document.getElementById('certSealYear').textContent     = new Date(dateStr).getFullYear();
+
+  document.getElementById('certWrapper').style.display = '';
+  document.getElementById('nameOverlay').classList.add('hidden');
+  document.getElementById('notCompleteWrap').style.display = 'none';
+}
+
+function saveName(){
+  const val = document.getElementById('nameInput').value.trim();
+  if(!val) return;
+  try{ localStorage.setItem(NAME_KEY, val); }catch(e){}
+  showCertificate(val);
+}
+
+function editName(){
+  const existing = localStorage.getItem(NAME_KEY) || '';
+  const inp = document.getElementById('nameInput');
+  inp.value = existing;
+  document.getElementById('nameBtn').disabled = !existing;
+  document.getElementById('certWrapper').style.display = 'none';
+  document.getElementById('nameOverlay').classList.remove('hidden');
+  setTimeout(()=>inp.focus(),50);
+}
+
+// Name input validation
+document.getElementById('nameInput').addEventListener('input', function(){
+  document.getElementById('nameBtn').disabled = !this.value.trim();
+});
+document.getElementById('nameInput').addEventListener('keydown', function(e){
+  if(e.key==='Enter' && this.value.trim()) saveName();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(function init(){
+  if(!allComplete()){
+    document.getElementById('notCompleteWrap').style.display = '';
+    document.getElementById('nameOverlay').classList.add('hidden');
+    return;
+  }
+
+  const savedName = localStorage.getItem(NAME_KEY);
+  if(savedName){
+    showCertificate(savedName);
+  } else {
+    document.getElementById('nameOverlay').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('nameInput').focus(), 100);
+  }
+})();
+</script>
+</body>
+</html>
