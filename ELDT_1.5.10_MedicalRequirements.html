@@ -1213,7 +1213,7 @@ function showResults(){
           ? '<button class="btn btn-prev" onclick="reviewAnswers()">Review Answers</button>' +
             (nextModule
               ? '<a class="btn btn-next" href="./' + nextModule.file + '">Continue to Module ' + nextModule.num + ' →</a>'
-              : '<a class="btn btn-next" href="./index.html">Back to Course Home</a>')
+              : '<a class="btn btn-prev" href="./index.html">Course Home</a><a class="btn btn-next" style="background:#2e7d4f;color:#fff" href="./certificate.html">🎓 Get Certificate →</a>')
           : '<button class="btn btn-prev" onclick="reviewCourse()">Review Course</button><button class="btn btn-next" onclick="startQuiz()">Retake Quiz</button>'}
       </div>
     </div>
